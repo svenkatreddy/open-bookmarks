@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-bookmarks"
+version = "0.1.0"
+description = "A small, dependency free library for open-bookmarks packs: load, validate, flatten, and expand remote folders."
+readme = "README.md"
+license = "MIT"
+authors = [{name = "svenkatreddy"}]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/svenkatreddy/open-bookmarks"
+Repository = "https://github.com/svenkatreddy/open-bookmarks"
+Issues = "https://github.com/svenkatreddy/open-bookmarks/issues"
+
+[tool.setuptools]
+py-modules = ["open_bookmarks"]

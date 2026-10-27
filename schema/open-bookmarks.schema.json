@@ -1,0 +1,108 @@
+{
+  "$defs": {
+    "node": {
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "url"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "url"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "custom-properties": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/node"
+          },
+          "type": "array"
+        },
+        "source": {
+          "pattern": "^https://[^\\s]+$",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "type": "string",
+          "pattern": ".*\\S.*"
+        },
+        "type": {
+          "enum": [
+            "folder",
+            "url"
+          ]
+        },
+        "url": {
+          "pattern": "^https?://[^\\s]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "title"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://example.com/open-bookmarks.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "custom-properties": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "description": {
+      "type": "string"
+    },
+    "format": {
+      "const": "open-bookmarks/1.0"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/node"
+      },
+      "type": "array"
+    },
+    "source": {
+      "pattern": "^https://[^\\s]+$",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string",
+      "pattern": ".*\\S.*"
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])(T([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?(Z|[+-]([01]\\d|2[0-3]):[0-5]\\d)?)?$"
+    },
+    "version": {
+      "minLength": 1,
+      "type": "string",
+      "pattern": ".*\\S.*"
+    }
+  },
+  "required": [
+    "format",
+    "title",
+    "nodes"
+  ],
+  "title": "open-bookmarks pack",
+  "type": "object"
+}

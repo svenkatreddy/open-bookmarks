@@ -1,0 +1,24 @@
+{
+  "description": "A minimal valid pack: one folder, two links.",
+  "format": "open-bookmarks/1.0",
+  "nodes": [
+    {
+      "nodes": [
+        {
+          "title": "BBC News",
+          "type": "url",
+          "url": "https://www.bbc.com/news"
+        },
+        {
+          "title": "Reuters",
+          "type": "url",
+          "url": "https://www.reuters.com/"
+        }
+      ],
+      "title": "Reading",
+      "type": "folder"
+    }
+  ],
+  "title": "Simple",
+  "version": "1.0.0"
+}

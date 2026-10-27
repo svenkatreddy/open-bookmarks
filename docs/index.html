@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>open-bookmarks</title>
+<style>
+body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #111; }
+pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; }
+a { color: #1f6feb; }
+</style>
+</head>
+<body>
+<h1>open-bookmarks</h1>
+<p>Status: 1.0 Draft, not yet published. Breaking changes are still allowed before the 1.0 publication.</p>
+<p>A simple, open format for sharing bookmark packs. A pack is a JSON file with folders and links. Anyone can write one, host it anywhere, and share it by URL. No account, no server, no lock-in.</p>
+<p>A folder can hold links directly, or it can point at another pack with a <code>source</code> URL. Importing takes a snapshot. Remote packs only change your copy when you refresh on purpose. Only http and https links are allowed, and remote sources must use https.</p>
+<h2>Example pack</h2>
+<pre>{
+  "format": "open-bookmarks/1.0",
+  "title": "News",
+  "nodes": [
+    {
+      "type": "folder",
+      "title": "World",
+      "nodes": [
+        { "type": "url", "title": "BBC News", "url": "https://www.bbc.com/news" }
+      ]
+    }
+  ]
+}</pre>
+<h2>Docs in this folder</h2>
+<ul>
+<li><a href="SYNTAX.md">SYNTAX.md</a> - field by field syntax, with valid and invalid examples</li>
+<li><a href="EXAMPLES.md">EXAMPLES.md</a> - every example pack, what it shows, and a snippet of each</li>
+<li><a href="MONOREPO.md">MONOREPO.md</a> - how this repo holds several libraries side by side</li>
+<li><a href="DEPLOY.md">DEPLOY.md</a> - how to publish these docs, on GitHub Pages or Vercel</li>
+<li><a href="versions.md">versions.md</a> - version history</li>
+</ul>
+<p>Note: on a plain static host, the Markdown files above are served as files, not rendered as web pages. This index page is HTML, so it is readable on its own. For the full specification and the code, see the repo on GitHub:</p>
+<p><a href="https://github.com/svenkatreddy/open-bookmarks">svenkatreddy/open-bookmarks</a></p>
+</body>
+</html>

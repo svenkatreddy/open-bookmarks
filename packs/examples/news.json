@@ -1,0 +1,39 @@
+{
+  "description": "A starter news pack. World news is inline, tech news lives in a second pack file so this one stays small.",
+  "format": "open-bookmarks/1.0",
+  "nodes": [
+    {
+      "nodes": [
+        {
+          "custom-properties": {
+            "accent": "#1f6feb",
+            "icon": "globe"
+          },
+          "title": "BBC News",
+          "type": "url",
+          "url": "https://www.bbc.com/news"
+        },
+        {
+          "title": "Reuters",
+          "type": "url",
+          "url": "https://www.reuters.com/"
+        },
+        {
+          "title": "Associated Press",
+          "type": "url",
+          "url": "https://apnews.com/"
+        }
+      ],
+      "title": "World",
+      "type": "folder"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/tech.json",
+      "title": "Tech News",
+      "type": "folder"
+    }
+  ],
+  "title": "News",
+  "updated": "2026-10-27",
+  "version": "1.2.0"
+}

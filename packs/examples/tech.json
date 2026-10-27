@@ -1,0 +1,1 @@
+{"description":"The remote half of the news pack. A reader fetches this only when someone opens the Tech News folder.","format":"open-bookmarks/1.0","nodes":[{"title":"Hacker News","type":"url","url":"https://news.ycombinator.com/"},{"title":"The Verge","type":"url","url":"https://www.theverge.com/"}],"title":"Tech News","updated":"2026-10-27"}

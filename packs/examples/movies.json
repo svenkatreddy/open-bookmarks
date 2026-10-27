@@ -1,0 +1,46 @@
+{
+  "description": "A starter movies pack, with trailers, reviews, and listings in separate folders.",
+  "format": "open-bookmarks/1.0",
+  "nodes": [
+    {
+      "nodes": [
+        {
+          "title": "Rotten Tomatoes",
+          "type": "url",
+          "url": "https://www.rottentomatoes.com/"
+        },
+        {
+          "title": "Metacritic Movies",
+          "type": "url",
+          "url": "https://www.metacritic.com/movie/"
+        }
+      ],
+      "title": "Reviews",
+      "type": "folder"
+    },
+    {
+      "nodes": [
+        {
+          "custom-properties": {
+            "accent": "#f5c518",
+            "client-version": "example-client-1",
+            "icon": "film"
+          },
+          "title": "IMDb",
+          "type": "url",
+          "url": "https://www.imdb.com/"
+        },
+        {
+          "title": "Letterboxd",
+          "type": "url",
+          "url": "https://letterboxd.com/"
+        }
+      ],
+      "title": "Listings",
+      "type": "folder"
+    }
+  ],
+  "title": "Movies",
+  "updated": "2026-10-27",
+  "version": "1.1.0"
+}
