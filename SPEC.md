@@ -76,6 +76,8 @@ A conformant pack MUST satisfy all of the following:
   MUST be a JSON object, as defined in Section 7.
 - Any version field present, on the pack, MUST be a non-empty
   string, as defined in Section 12.
+- Any icon field present, on the pack or on a node, MUST be an
+  object with a required src, as defined in Section 7.1.
 
 A pack that satisfies this list is conformant even if it contains
 unknown fields. Readers MUST ignore unknown fields, as stated in
@@ -105,6 +107,10 @@ A conformant reader MUST do all of the following:
   non-empty string, and MUST NOT reject a pack only because its
   version is not in semantic versioning form. Pack version
   handling is defined in Section 12.
+- Preserve an icon field when loading a pack, and include it in
+  flattened output for a bookmark that has it, as stated in
+  Section 7.1. A reader MUST NOT fetch an icon URL on import;
+  icon fetching is display only, as stated in Section 7.1.
 
 ### 4.3 Conformant writer
 
@@ -115,7 +121,11 @@ A conformant writer MUST do all of the following:
 - Write only http or https values in url fields, and only https
   values in source fields.
 - Write custom-properties, if present, only as a JSON object.
+- Write an icon field, if present, only as an object with a
+  required src, as defined in Section 7.1.
 - MUST NOT write a javascript:, data:, or file: URL in any url or
+  source field. This rule does not ban a data URI as an icon
+  src, which is allowed by Section 7.1 and is not a url or
   source field.
 
 ## 5. Pack
@@ -133,10 +143,11 @@ Table 1. Pack fields. Normative.
 | source | No | String. The URL this pack was published at, if known. MUST be https, as defined in Section 8. |
 | updated | No | String. An ISO 8601 [ISO8601] date or date-time, for example "2026-10-27". |
 | nodes | Yes | List of nodes. MAY be empty. |
+| icon | No | Object. An image for the pack. See Section 7.1. |
 | custom-properties | No | JSON object for client use only. See Section 7. |
 
 A reader MUST accept a pack even if description, source, updated,
-or version are missing. A reader MUST reject a pack if format is
+version, or icon are missing. A reader MUST reject a pack if format is
 wrong, title is missing or empty, or nodes is not a list, subject
 to the minor version warning rule in Section 11.
 
@@ -180,6 +191,7 @@ Table 2. url node fields. Normative.
 | type | Yes | String. MUST be "url". |
 | title | Yes | String. MUST be non-empty after trimming surrounding whitespace. |
 | url | Yes | String. MUST be http or https, as defined in Section 8. |
+| icon | No | Object. An image for the bookmark. See Section 7.1. |
 | custom-properties | No | JSON object for client use only. See Section 7. |
 
 ### 6.2 folder node
@@ -206,6 +218,7 @@ Table 3. Folder node fields. Normative.
 | title | Yes | String. MUST be non-empty after trimming surrounding whitespace. |
 | nodes | No | List of child nodes. If absent, it defaults to an empty list. |
 | source | No | String. See remote folders below. MUST be https, as defined in Section 8. |
+| icon | No | Object. An image for the folder. See Section 7.1. |
 | custom-properties | No | JSON object for client use only. See Section 7. |
 
 A folder MAY have nodes, a source, or both. If it has both, readers
@@ -310,13 +323,127 @@ Rules for readers and writers, normative:
   The links and folders survive that export, the custom properties
   do not. Writers MUST NOT invent a Netscape encoding for it.
 
+## 7.1 Icon
+
+A pack, a folder, and a url node MAY each carry a field called
+icon. It is optional everywhere. A pack or node with no icon is
+valid, and a reader MUST NOT require one.
+
+Icon is distinct from custom-properties. A custom-properties key
+called "icon" is a client-defined name, for example "globe" or
+"film". It is a string chosen by a client, and the standard does
+not interpret it. The icon field in this section is different: it
+is a standard object that points at an image file. The two MAY
+appear together, and neither replaces the other. A reader MUST
+NOT treat a custom-properties icon string as a standard icon
+image, and MUST NOT treat a standard icon object as a
+custom-properties name.
+
+Table 4. Icon fields. Normative.
+
+| Field | Required | Type and rules |
+| --- | --- | --- |
+| src | Yes, when icon is present | String. MUST be an https URL with a host, or an image data URI. See below. |
+| type | No | String. If present, MUST be one of image/png, image/svg+xml, image/x-icon, image/webp, image/gif, or image/jpeg. |
+| sizes | No | String. If present, MUST be "any", or one or more sizes like "32x32" separated by single spaces, for example "16x16 32x32". |
+
+Rules, normative:
+
+- If icon is present, it MUST be an object. A string, number,
+  array, or null value is invalid. In particular, a string icon
+  such as "globe" is invalid as an icon field, even though the
+  same string is valid inside custom-properties.
+- src, when icon is present, MUST be present and MUST be a
+  non-empty string after trimming surrounding whitespace.
+- src MUST be either an https URL with a host, or a data URI
+  for an image. An http URL, a javascript: URL, a file: URL, a
+  host-less URL, and a data URI that is not an image are all
+  invalid as an icon src.
+- A data URI src MUST start with "data:", followed by an image
+  MIME type from the type list above, followed by a comma that
+  separates the header from the data, followed by non-empty
+  data. The header MAY include ";base64" for base64 data, or a
+  charset for URL-encoded SVG, for example
+  "data:image/svg+xml,%3Csvg%20...". Writers and readers MUST
+  NOT validate the actual image bytes, only the MIME type and
+  the comma separator, as stated here.
+- type, if present, MUST be exactly one of the six MIME types
+  in Table 4. A type that does not match the image at src is a
+  writer error, but readers SHOULD use the type as a hint and
+  fall back to the image itself when they disagree.
+- sizes, if present, MUST be "any" or a space separated list of
+  width by height sizes, each written as digits, "x", digits.
+  "any" is for scalable images, normally SVG. A sizes value
+  such as "large" or "32" is invalid.
+- Readers MUST support PNG and SVG icons. Readers SHOULD support
+  ICO (image/x-icon) and WebP icons. Readers MAY support GIF
+  and JPEG icons.
+- Writers SHOULD use PNG or SVG for icons. Writers SHOULD NOT
+  use JPEG for icons, because JPEG has no transparency and loses
+  quality when resized. Writers SHOULD NOT use animated GIFs
+  for icons, because animation distracts and the files are large.
+- Data URIs SHOULD stay small, about 64 KB or less, because a
+  data URI is stored inside the pack file itself and bloats it.
+  For a shared pack, writers SHOULD prefer an https URL for the
+  icon, and use a data URI only for a small custom icon.
+- Exporting an open-bookmarks pack to Netscape HTML preserves
+  an icon src only, and drops type and sizes, because Netscape
+  HTML has no place for them. An https icon src becomes an
+  ICON_URI attribute. A base64 data URI icon src becomes an
+  ICON attribute holding only the base64 part after the comma.
+  A non-base64 data URI icon is dropped on Netscape export,
+  because Netscape ICON expects base64 data. Folder icons are
+  dropped on Netscape export, because a Netscape folder heading
+  has no standard icon attribute.
+
+Privacy guidance, informative, not a validity rule: a reader
+SHOULD NOT fetch an icon URL when a pack is imported, listed, or
+refreshed. It SHOULD fetch an icon only when the icon is about
+to be shown. Where a reader can, it SHOULD prefer a site favicon
+derived from the bookmark URL itself over a third-party icon
+host, because fetching from a third-party host tells that host
+the reader holds that bookmark. A data URI icon needs no fetch
+at all, which is its privacy advantage, at the cost of pack size.
+
+Example, non-normative:
+
+```json
+{
+  "type": "url",
+  "title": "BBC News",
+  "url": "https://www.bbc.com/news",
+  "icon": {
+    "src": "https://www.bbc.com/favicon.ico",
+    "type": "image/x-icon",
+    "sizes": "16x16 32x32"
+  }
+}
+```
+
+Example, non-normative, an SVG data URI icon:
+
+```json
+{
+  "type": "url",
+  "title": "Example",
+  "url": "https://example.com/",
+  "icon": {
+    "src": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Ccircle%20cx='8'%20cy='8'%20r='8'%20fill='%231f6feb'/%3E%3C/svg%3E",
+    "type": "image/svg+xml",
+    "sizes": "any"
+  }
+}
+```
+
 ## 8. URL rules
 
 These rules apply to every url field and every source field:
 
 - Only http and https are allowed in a url field.
 - Only https is allowed in a source field.
-- javascript:, data:, file:, and any other scheme MUST be rejected.
+- javascript:, data:, file:, and any other scheme MUST be rejected
+  in a url field or a source field. A data URI is allowed only
+  as an icon src, as defined in Section 7.1, and nowhere else.
 - A URL with no scheme, or with spaces, MUST be rejected.
 - Readers SHOULD keep the URL exactly as written, apart from
   trimming surrounding whitespace. They SHOULD NOT add tracking
@@ -378,6 +505,10 @@ A pack is valid if all of the following hold:
    along the path from the root to a folder.
 7. Any custom-properties present, on the pack or on a node, is a
    JSON object. Other values are invalid.
+8. Any icon present, on the pack or on a node, is an object with
+   a required src that is an https URL or an image data URI, an
+   optional type from the list in Section 7.1, and optional
+   sizes in the form in Section 7.1. Other values are invalid.
 
 The JSON Schema in schema/open-bookmarks.schema.json covers items
 1 to 4 and the shape of nodes. Depth and cycle checks need code, so
@@ -479,11 +610,10 @@ version difference as proof that links changed, and MUST NOT
 treat equal versions as proof that links did not change. The
 content comparison in Section 12.2 is the check that matters.
 
-Note, informative: the schema checks that version, if present,
-has at least one character, but it does not trim whitespace. A
-version that is only spaces therefore passes the schema alone and
-fails the prose rule in this section and the validator. The prose
-rule in this section governs. No hash field is defined in this
+Note, informative: the schema and the validator both reject a
+version that is only spaces, the schema by a pattern requiring a
+non-space character and the validator by trimming. The prose
+rule in this section governs if they ever disagree. No hash field is defined in this
 draft. That choice is deliberate: a hash was discussed and parked,
 not added, so readers MUST NOT expect a hash field in a 1.0 pack,
 and writers MUST NOT invent one as part of this format.

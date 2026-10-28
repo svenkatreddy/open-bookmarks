@@ -13,7 +13,10 @@ What it shows: a normal pack with an inline folder and a remote
 folder. World news is inline. Tech News points at a second pack
 file, so the first file stays small. It also carries pack
 version "1.2.0", the author's version of this pack, distinct
-from the format version "open-bookmarks/1.0".
+from the format version "open-bookmarks/1.0". BBC News also
+carries a standard icon, an https ICO favicon, alongside its
+custom-properties icon name "globe", to show that the two fields
+are different and can appear together.
 
 Snippet:
 
@@ -234,6 +237,37 @@ The standard does not interpret any key inside
 custom-properties. A reader that does not know a key must ignore
 that key and keep the rest. See [SYNTAX.md](SYNTAX.md) for the
 full rules.
+
+## Icons
+
+File: [../packs/examples/icon.json](../packs/examples/icon.json)
+
+What it shows: the standard icon field at all three levels, all
+optional. The pack itself has an https PNG icon. The News folder
+has an https SVG icon. Inside the folder, BBC News has an https
+ICO icon with two sizes, Example Site has a PNG data URI icon,
+and Reuters has an SVG data URI icon with sizes "any". Type and
+sizes are optional inside icon, and a pack or node with no icon
+is still valid.
+
+Snippet:
+
+```json
+{
+  "type": "url",
+  "title": "BBC News",
+  "url": "https://www.bbc.com/news",
+  "icon": {
+    "src": "https://example.com/favicon.ico",
+    "type": "image/x-icon",
+    "sizes": "16x16 32x32"
+  }
+}
+```
+
+See [SYNTAX.md](SYNTAX.md) for the full icon rules, including
+the invalid cases: a string icon, a missing src, an http src, a
+javascript: src, a bad type, and a bad sizes value.
 
 ## How to check an example
 

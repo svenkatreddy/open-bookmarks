@@ -9,7 +9,7 @@ reference.
 
 | Version | Status | Date | What it contains |
 | --- | --- | --- | --- |
-| 1.0 | Draft, unpublished | 2026-10-27 | Pack format with folder, url, and remote folder nodes, snapshot import, https only URLs, depth limit of 4 folder levels, cycle limits, converters from Netscape HTML, Chrome JSON, Firefox JSON, XBEL, and simple lists, export back to Netscape HTML, Python, JavaScript, and TypeScript libraries, the `custom-properties` object for client use, and the optional pack `version` field for reader update guidance. No hash field is defined in this draft; a hash was discussed and parked, not added. |
+| 1.0 | Draft, unpublished | 2026-10-27 | Pack format with folder, url, and remote folder nodes, snapshot import, https only URLs, depth limit of 4 folder levels, cycle limits, converters from Netscape HTML, Chrome JSON, Firefox JSON, XBEL, and simple lists, export back to Netscape HTML, Python, JavaScript, and TypeScript libraries, the `custom-properties` object for client use, the optional pack `version` field for reader update guidance, and the optional standard `icon` object on packs, folders, and url nodes. No hash field is defined in this draft; a hash was discussed and parked, not added. No tags field and no added field were added with icon. |
 
 Versioning rules, in short:
 
@@ -31,3 +31,9 @@ Draft note, 2026-10-27: the pack `version` field was added to
 the draft, as an optional string distinct from the `format`
 field. The format version did not change. A hash field was
 explicitly not added at the same time; it remains parked.
+
+Draft note, 2026-10-27: the standard `icon` field was added to
+the draft after the first push, as an optional object on packs,
+folders, and url nodes. The format version did not change. Tags
+and added were not added with icon, and a hash field remains
+parked. This icon update has not been pushed again yet.

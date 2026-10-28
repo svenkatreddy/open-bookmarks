@@ -50,6 +50,9 @@
         "url": {
           "pattern": "^https?://[^\\s]+$",
           "type": "string"
+        },
+        "icon": {
+          "$ref": "#/$defs/icon"
         }
       },
       "required": [
@@ -57,6 +60,34 @@
         "title"
       ],
       "type": "object"
+    },
+    "icon": {
+      "type": "object",
+      "required": [
+        "src"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "src": {
+          "type": "string",
+          "pattern": "^(https://\\S+|data:image/(png|svg\\+xml|x-icon|webp|gif|jpeg)(;[^,\\s]*)?,\\S+)$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "image/png",
+            "image/svg+xml",
+            "image/x-icon",
+            "image/webp",
+            "image/gif",
+            "image/jpeg"
+          ]
+        },
+        "sizes": {
+          "type": "string",
+          "pattern": "^(any|(\\d+x\\d+)( \\d+x\\d+)*)$"
+        }
+      }
     }
   },
   "$id": "https://example.com/open-bookmarks.schema.json",
@@ -96,6 +127,9 @@
       "minLength": 1,
       "type": "string",
       "pattern": ".*\\S.*"
+    },
+    "icon": {
+      "$ref": "#/$defs/icon"
     }
   },
   "required": [

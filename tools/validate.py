@@ -14,6 +14,9 @@ Checks, in plain language:
   - any custom-properties present, on the pack or on a node,
     is a JSON object, not a string, number, array, or null
   - any version present, on the pack, is a non-empty string
+  - any icon present, on the pack or on a node, is an object
+    with a required src that is an https URL or an image data
+    URI, an optional type from a fixed list, and optional sizes
   - folder nesting is no deeper than 4 folder levels
   - remote sources in the same file do not form a simple cycle
     (a source URL repeated on the path from the root to a folder)
@@ -24,6 +27,7 @@ Warnings do not fail validation.
 
 import argparse
 import json
+import re as _re
 import sys
 
 MAX_DEPTH = 4
@@ -63,7 +67,6 @@ def is_https_url(value):
     return _host_ok(lowered, "https://")
 
 
-import re as _re
 _UPDATED_RE = _re.compile(
     r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])"
     r"(T([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?"
@@ -73,6 +76,58 @@ _UPDATED_RE = _re.compile(
 
 def is_iso_date(value):
     return isinstance(value, str) and bool(_UPDATED_RE.match(value))
+
+
+ICON_TYPES = ("image/png", "image/svg+xml", "image/x-icon",
+                "image/webp", "image/gif", "image/jpeg")
+_SIZES_RE = _re.compile(r"^(any|(\d+x\d+)( \d+x\d+)*)$")
+
+
+def is_icon_src(value):
+    if not isinstance(value, str):
+        return False
+    value = value.strip()
+    if not value or " " in value:
+        return False
+    if value.startswith("data:"):
+        rest = value[len("data:"):]
+        if "," not in rest:
+            return False
+        header, data = rest.split(",", 1)
+        if not data:
+            return False
+        mime = header.split(";")[0]
+        return mime in ICON_TYPES
+    return is_https_url(value)
+
+
+def check_icon(obj, where, errors):
+    if "icon" not in obj:
+        return
+    icon = obj["icon"]
+    if not isinstance(icon, dict):
+        errors.append("%s: icon must be an object" % where)
+        return
+    src = icon.get("src")
+    if not isinstance(src, str) or not src.strip():
+        errors.append("%s: icon src is missing or empty" % where)
+    elif not is_icon_src(src):
+        errors.append(
+            "%s: icon src is not an https URL or an image data URI: %r"
+            % (where, src)
+        )
+    if "type" in icon and icon["type"] not in ICON_TYPES:
+        errors.append(
+            "%s: icon type must be one of %s, got %r"
+            % (where, ", ".join(ICON_TYPES), icon["type"])
+        )
+    if "sizes" in icon:
+        sizes = icon["sizes"]
+        if not isinstance(sizes, str) or not _SIZES_RE.match(sizes.strip()):
+            errors.append(
+                '%s: icon sizes must be like "32x32", "16x16 32x32", '
+                'or "any", got %r' % (where, sizes)
+            )
 
 
 def check_custom_properties(obj, where, errors):
@@ -117,6 +172,7 @@ def validate_nodes(nodes, errors, folder_depth, path, seen_sources):
             errors.append("%s: unknown node type %r" % (where, node_type))
             continue
         check_custom_properties(node, where, errors)
+        check_icon(node, where, errors)
         if not isinstance(title, str) or not title.strip():
             errors.append("%s: title is missing or empty" % where)
         if node_type == "url":
@@ -168,6 +224,7 @@ def validate_pack(pack):
             "format must be open-bookmarks/1.0, got %r" % (pack.get("format"),)
         )
     check_custom_properties(pack, "pack", errors)
+    check_icon(pack, "pack", errors)
     if "description" in pack and not isinstance(pack["description"], str):
         errors.append("description must be a string")
     if "source" in pack and not is_https_url(pack["source"]):

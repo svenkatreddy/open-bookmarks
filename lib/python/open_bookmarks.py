@@ -15,8 +15,8 @@ Functions:
                        error, see format_warnings.
   format_warnings(pack) Return a list of version warnings.
   flatten_urls(pack)   Return a flat list of dicts with title, url,
-                       folder path, and custom-properties where the
-                       bookmark has it, in pack order.
+                       folder path, and custom-properties and icon
+                       where the bookmark has them, in pack order.
   expand_remote(pack, fetch)  Return a new pack with remote folders
                        expanded, using fetch(source_url) supplied by
                        the caller. The library itself does no network
@@ -127,6 +127,58 @@ def format_warnings(pack):
     return []
 
 
+ICON_TYPES = ("image/png", "image/svg+xml", "image/x-icon",
+                "image/webp", "image/gif", "image/jpeg")
+_SIZES_RE = _re.compile(r"^(any|(\d+x\d+)( \d+x\d+)*)$")
+
+
+def _is_icon_src(value):
+    if not isinstance(value, str):
+        return False
+    value = value.strip()
+    if not value or " " in value:
+        return False
+    if value.startswith("data:"):
+        rest = value[len("data:"):]
+        if "," not in rest:
+            return False
+        header, data = rest.split(",", 1)
+        if not data:
+            return False
+        mime = header.split(";")[0]
+        return mime in ICON_TYPES
+    return _is_https_url(value)
+
+
+def _check_icon(obj, where, errors):
+    if not isinstance(obj, dict) or "icon" not in obj:
+        return
+    icon = obj["icon"]
+    if not isinstance(icon, dict):
+        errors.append("%s: icon must be an object" % where)
+        return
+    src = icon.get("src")
+    if not isinstance(src, str) or not src.strip():
+        errors.append("%s: icon src is missing or empty" % where)
+    elif not _is_icon_src(src):
+        errors.append(
+            "%s: icon src is not an https URL or an image data URI: %r"
+            % (where, src)
+        )
+    if "type" in icon and icon["type"] not in ICON_TYPES:
+        errors.append(
+            "%s: icon type must be one of %s, got %r"
+            % (where, ", ".join(ICON_TYPES), icon["type"])
+        )
+    if "sizes" in icon:
+        sizes = icon["sizes"]
+        if not isinstance(sizes, str) or not _SIZES_RE.match(sizes.strip()):
+            errors.append(
+                '%s: icon sizes must be like "32x32", "16x16 32x32", '
+                'or "any", got %r' % (where, sizes)
+            )
+
+
 def _check_custom_properties(obj, where, errors):
     if isinstance(obj, dict) and "custom-properties" in obj:
         if not isinstance(obj["custom-properties"], dict):
@@ -155,6 +207,7 @@ def validate_pack(pack):
                 errors.append("%s: unknown node type %r" % (where, node_type))
                 continue
             _check_custom_properties(node, where, errors)
+            _check_icon(node, where, errors)
             if not isinstance(title, str) or not title.strip():
                 errors.append("%s: title is missing or empty" % where)
             if node_type == "url" and not _is_http_url(node.get("url")):
@@ -195,6 +248,7 @@ def validate_pack(pack):
             "format must be %s, got %r" % (FORMAT, pack.get("format"))
         )
     _check_custom_properties(pack, "pack", errors)
+    _check_icon(pack, "pack", errors)
     if "description" in pack and not isinstance(pack["description"], str):
         errors.append("description must be a string")
     if "source" in pack and not _is_https_url(pack["source"]):
@@ -238,6 +292,8 @@ def flatten_urls(pack, _nodes=None, _path=None, _seen=None):
             }
             if "custom-properties" in node:
                 entry["custom-properties"] = node["custom-properties"]
+            if "icon" in node:
+                entry["icon"] = node["icon"]
             out.append(entry)
         elif node.get("type") == "folder":
             out.extend(

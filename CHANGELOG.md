@@ -55,6 +55,22 @@ Added:
   the copy on its own. No hash field was added: a hash was
   discussed and explicitly parked, not implemented. The format
   version is unchanged.
+- Standard `icon` field, added to the 1.0 draft after the first
+  push, not yet pushed again: an optional object on the pack, on
+  folders, and on url nodes, with a required src that must be an
+  https URL or an image data URI, an optional type from
+  image/png, image/svg+xml, image/x-icon, image/webp, image/gif,
+  or image/jpeg, and optional sizes like "32x32" or "any".
+  Readers must support PNG and SVG. Icon is distinct from the
+  custom-properties icon name, which is unchanged. The validator
+  and the Python, JavaScript, and TypeScript libraries validate
+  icon the same way, and flattening includes icon when a
+  bookmark has it. Converters map Netscape ICON_URI and Firefox
+  iconuri to icon, skip a bare Netscape ICON with no MIME type,
+  and export an https icon as ICON_URI and a base64 data URI
+  icon as ICON, dropping type and sizes. No tags field, no
+  added field, and no hash field were added with icon. The
+  format version is unchanged.
 - Honest review fixes, before first push: the open-bookmarks to
   open-bookmarks converter now preserves description, source,
   updated, version, and custom-properties, instead of dropping

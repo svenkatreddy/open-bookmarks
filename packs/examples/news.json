@@ -11,7 +11,12 @@
           },
           "title": "BBC News",
           "type": "url",
-          "url": "https://www.bbc.com/news"
+          "url": "https://www.bbc.com/news",
+          "icon": {
+            "src": "https://www.bbc.com/favicon.ico",
+            "type": "image/x-icon",
+            "sizes": "16x16 32x32"
+          }
         },
         {
           "title": "Reuters",

@@ -35,8 +35,22 @@ Rules, shared by every converter:
     still valid and a reader falls back to a content diff by URL
     for update guidance. The one exception is open-bookmarks to
     open-bookmarks, which preserves the input pack's description,
-    source, updated, version, and custom-properties, so a round
-    trip does not lose them.
+    source, updated, version, icon, and custom-properties, so a
+    round trip does not lose them.
+  - Icons: Netscape ICON_URI, when it is https, becomes an icon
+    src, with type inferred from the file extension (.png, .svg,
+    .ico, .webp, .gif, .jpg or .jpeg) when the extension is
+    known, and type omitted otherwise. Netscape ICON alone, a
+    base64 value with no MIME type, is skipped with a warning;
+    no MIME type is invented for it. Firefox iconuri, when it is
+    a data:image/ URI or an https URL, becomes an icon src, with
+    type taken from the data URI header or inferred from the
+    extension; any other scheme, including moz-anno:, is skipped
+    with a warning. Exporting open-bookmarks to Netscape HTML
+    writes an https icon src as ICON_URI, and a base64 data URI
+    icon src as ICON holding only the base64 part after the
+    comma; type and sizes are lost on that export, and folder
+    icons and non-base64 data URI icons are dropped.
   - Depth: when converting to open-bookmarks, folders deeper
     than 4 levels are skipped with a warning, and their whole
     subtree is skipped, so converter output always conforms to
@@ -171,6 +185,65 @@ def folder_node(title, nodes=None, source=None):
     return node
 
 
+ICON_TYPES = {
+    "image/png", "image/svg+xml", "image/x-icon",
+    "image/webp", "image/gif", "image/jpeg",
+}
+_EXT_TO_TYPE = {
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+}
+
+
+def infer_icon_type(src):
+    lowered = src.strip().lower()
+    lowered = lowered.split("?")[0].split("#")[0]
+    for ext, mime in _EXT_TO_TYPE.items():
+        if lowered.endswith(ext):
+            return mime
+    return None
+
+
+def icon_from_src(src):
+    """Return an icon dict for a valid src, or None with a warning."""
+    if not isinstance(src, str) or not src.strip():
+        return None
+    src = src.strip()
+    if src.startswith("data:"):
+        rest = src[len("data:"):]
+        if "," not in rest:
+            warn("skipping icon data URI with no comma: %r" % (src[:60],))
+            return None
+        header, data = rest.split(",", 1)
+        mime = header.split(";")[0]
+        if mime not in ICON_TYPES or not data:
+            warn("skipping non-image icon data URI: %r" % (src[:60],))
+            return None
+        return {"src": src, "type": mime}
+    if is_https_url(src):
+        icon = {"src": src}
+        mime = infer_icon_type(src)
+        if mime:
+            icon["type"] = mime
+        return icon
+    warn("skipping icon src that is not https or an image data URI: %r" % (src,))
+    return None
+
+
+def attach_icon(node, src):
+    if node is None:
+        return None
+    icon = icon_from_src(src)
+    if icon is not None:
+        node["icon"] = icon
+    return node
+
+
 # Netscape HTML
 
 
@@ -198,7 +271,12 @@ class NetscapeParser(HTMLParser):
             self.pending_folder = {"type": "folder", "title": "", "nodes": []}
         elif tag == "a":
             self.in_a = True
-            self.pending_link = {"href": attrs.get("href", ""), "title": ""}
+            self.pending_link = {
+                "href": attrs.get("href", ""),
+                "title": "",
+                "icon_uri": attrs.get("icon_uri", ""),
+                "icon": attrs.get("icon", ""),
+            }
 
     def handle_endtag(self, tag):
         tag = tag.lower()
@@ -215,6 +293,15 @@ class NetscapeParser(HTMLParser):
                     self.pending_link["title"], self.pending_link["href"]
                 )
                 if node is not None:
+                    icon_uri = self.pending_link.get("icon_uri", "")
+                    if icon_uri:
+                        attach_icon(node, icon_uri)
+                    elif self.pending_link.get("icon"):
+                        warn(
+                            "skipping Netscape ICON with no MIME type for %r; "
+                            "use ICON_URI with an https URL instead"
+                            % (self.pending_link["title"],)
+                        )
                     self.stack[-1].append(node)
                 self.pending_link = None
         elif tag == "dl":
@@ -299,7 +386,11 @@ def walk_generic_node(node):
     # Firefox uses text/x-moz-place and text/x-moz-place-container.
     if node_type in ("url", "text/x-moz-place") or "uri" in node:
         url = node.get("uri") or node.get("url", "")
-        return url_node(node.get("title") or node.get("name"), url)
+        node_out = url_node(node.get("title") or node.get("name"), url)
+        iconuri = node.get("iconuri") or node.get("icon_uri")
+        if iconuri:
+            attach_icon(node_out, iconuri)
+        return node_out
     if node_type in ("folder", "text/x-moz-place-container") or (
         "children" in node or "nodes" in node
     ):
@@ -447,11 +538,24 @@ def nodes_to_netscape(nodes, indent=0):
     lines = [pad + "<DL><p>"]
     for node in nodes:
         if node.get("type") == "url":
+            icon_attrs = ""
+            icon = node.get("icon")
+            if isinstance(icon, dict) and isinstance(icon.get("src"), str):
+                src = icon["src"].strip()
+                if src.startswith("https://"):
+                    icon_attrs = ' ICON_URI="%s"' % html.escape(src, quote=True)
+                elif src.startswith("data:"):
+                    rest = src[len("data:"):]
+                    if "," in rest:
+                        header, data = rest.split(",", 1)
+                        if ";base64" in header and data:
+                            icon_attrs = ' ICON="%s"' % html.escape(data, quote=True)
             lines.append(
-                '%s<DT><A HREF="%s">%s</A>'
+                '%s<DT><A HREF="%s"%s>%s</A>'
                 % (
                     pad,
                     html.escape(node.get("url", ""), quote=True),
+                    icon_attrs,
                     html.escape(node.get("title", "")),
                 )
             )
@@ -554,7 +658,7 @@ def main(argv=None):
             "nodes": nodes,
         }
         if from_format == "open-bookmarks" and isinstance(data, dict):
-            for field in ("description", "source", "updated", "version", "custom-properties"):
+            for field in ("description", "source", "updated", "version", "icon", "custom-properties"):
                 if field in data:
                     pack[field] = data[field]
         output = json.dumps(pack, indent=2, ensure_ascii=False) + "\n"

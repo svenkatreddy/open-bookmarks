@@ -15,7 +15,8 @@
 //                     error, see formatWarnings.
 // formatWarnings(pack) Return a list of version warnings.
 // flattenUrls(pack)   Return a flat list of title, url, folder path,
-//                     and custom-properties where the bookmark has it.
+//                     and custom-properties and icon where the
+//                     bookmark has them.
 // expandRemote(pack, fetch)  Return a new pack with remote folders
 //                     expanded, using the fetch function supplied by
 //                     the caller. This module itself does no network
@@ -29,10 +30,17 @@ export const FORMAT = "open-bookmarks/1.0";
 
 export type CustomProperties = Record<string, unknown>;
 
+export interface Icon {
+  src: string;
+  type?: string;
+  sizes?: string;
+}
+
 export interface UrlNode {
   type: "url";
   title: string;
   url: string;
+  icon?: Icon;
   "custom-properties"?: CustomProperties;
 }
 
@@ -41,6 +49,7 @@ export interface FolderNode {
   title: string;
   nodes?: PackNode[];
   source?: string;
+  icon?: Icon;
   "custom-properties"?: CustomProperties;
 }
 
@@ -54,6 +63,7 @@ export interface Pack {
   updated?: string;
   version?: string;
   nodes: PackNode[];
+  icon?: Icon;
   "custom-properties"?: CustomProperties;
 }
 
@@ -61,6 +71,7 @@ export interface FlatLink {
   title: string;
   url: string;
   path: string;
+  icon?: Icon;
   "custom-properties"?: CustomProperties;
 }
 
@@ -131,6 +142,47 @@ export function formatWarnings(pack: unknown): string[] {
   return [];
 }
 
+const ICON_TYPES: string[] = ["image/png", "image/svg+xml", "image/x-icon", "image/webp", "image/gif", "image/jpeg"];
+const SIZES_RE = /^(any|(\d+x\d+)( \d+x\d+)*)$/;
+
+function isIconSrc(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.includes(" ")) return false;
+  if (trimmed.startsWith("data:")) {
+    const rest = trimmed.slice("data:".length);
+    const comma = rest.indexOf(",");
+    if (comma === -1) return false;
+    const header = rest.slice(0, comma);
+    const data = rest.slice(comma + 1);
+    if (!data) return false;
+    const mime = header.split(";")[0];
+    return ICON_TYPES.includes(mime);
+  }
+  return isHttpsUrl(value);
+}
+
+function checkIcon(obj: unknown, where: string, errors: string[]): void {
+  if (!obj || typeof obj !== "object" || !("icon" in obj)) return;
+  const icon = (obj as Record<string, unknown>)["icon"];
+  if (!icon || typeof icon !== "object" || Array.isArray(icon)) {
+    errors.push(`${where}: icon must be an object`);
+    return;
+  }
+  const typed = icon as Icon;
+  if (typeof typed.src !== "string" || !typed.src.trim()) {
+    errors.push(`${where}: icon src is missing or empty`);
+  } else if (!isIconSrc(typed.src)) {
+    errors.push(`${where}: icon src is not an https URL or an image data URI: ${JSON.stringify(typed.src)}`);
+  }
+  if ("type" in typed && !ICON_TYPES.includes(typed.type as string)) {
+    errors.push(`${where}: icon type must be one of ${ICON_TYPES.join(", ")}, got ${JSON.stringify(typed.type)}`);
+  }
+  if ("sizes" in typed && (typeof typed.sizes !== "string" || !SIZES_RE.test(typed.sizes.trim()))) {
+    errors.push(`${where}: icon sizes must be like "32x32", "16x16 32x32", or "any", got ${JSON.stringify(typed.sizes)}`);
+  }
+}
+
 function checkCustomProperties(obj: unknown, where: string, errors: string[]): void {
   if (obj && typeof obj === "object" && "custom-properties" in obj) {
     const value = (obj as Record<string, unknown>)["custom-properties"];
@@ -160,6 +212,7 @@ export function validatePack(pack: unknown): string[] {
         return;
       }
       checkCustomProperties(node, where, errors);
+      checkIcon(node, where, errors);
       if (typeof typed.title !== "string" || !typed.title.trim()) {
         errors.push(`${where}: title is missing or empty`);
       }
@@ -198,6 +251,7 @@ export function validatePack(pack: unknown): string[] {
     errors.push(`format must be ${FORMAT}, got ${JSON.stringify(typedPack.format)}`);
   }
   checkCustomProperties(pack, "pack", errors);
+  checkIcon(pack, "pack", errors);
   if ("description" in typedPack && typeof typedPack.description !== "string") {
     errors.push("description must be a string");
   }
@@ -233,6 +287,7 @@ export function flattenUrls(pack: Pack, nodes?: PackNode[], path?: string[], see
       seenSet.add(node.url);
       const entry: FlatLink = { title: node.title || "", url: node.url || "", path: currentPath.join("/") };
       if ("custom-properties" in node) entry["custom-properties"] = node["custom-properties"];
+      if ("icon" in node) entry["icon"] = node["icon"];
       out.push(entry);
     } else if (node.type === "folder") {
       out.push(...flattenUrls(pack, node.nodes || [], [...currentPath, node.title || ""], seenSet));

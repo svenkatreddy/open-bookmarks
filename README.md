@@ -70,6 +70,35 @@ it they do not know. Converting to Netscape HTML drops it, because
 Netscape HTML has no place for it. The full rules are in
 [SPEC.md](SPEC.md).
 
+## icon
+
+A pack, a folder, and a bookmark can each carry an optional
+`icon` object. It is different from the `icon` key inside
+`custom-properties`, which is just a client name like "globe".
+The standard `icon` points at an image:
+
+```json
+{
+  "type": "url",
+  "title": "BBC News",
+  "url": "https://www.bbc.com/news",
+  "icon": {
+    "src": "https://www.bbc.com/favicon.ico",
+    "type": "image/x-icon",
+    "sizes": "16x16 32x32"
+  }
+}
+```
+
+Inside `icon`, `src` is required, `type` and `sizes` are
+optional. `src` must be an https URL or an image data URI.
+`type` must be one of image/png, image/svg+xml, image/x-icon,
+image/webp, image/gif, or image/jpeg. Readers must support PNG
+and SVG. Writers should use PNG or SVG, and should not fetch an
+icon URL on import, only when the icon is shown. The full rules
+are in [SPEC.md](SPEC.md) Section 7.1 and
+[docs/SYNTAX.md](docs/SYNTAX.md).
+
 ## Versioning
 
 The current version is 1.0 Draft, unpublished. The `format` field
@@ -173,6 +202,7 @@ what it shows, and a short snippet of each. The packs include:
 - [packs/examples/nested.json](packs/examples/nested.json)
 - [packs/examples/remote.json](packs/examples/remote.json)
 - [packs/examples/custom-properties.json](packs/examples/custom-properties.json)
+- [packs/examples/icon.json](packs/examples/icon.json)
 - [packs/examples/tech.json](packs/examples/tech.json)
 
 ## Monorepo

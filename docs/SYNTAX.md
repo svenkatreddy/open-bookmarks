@@ -121,6 +121,7 @@ Table 1. Pack fields. Normative.
 | updated | No | String, ISO 8601 date or date-time |
 | version | No | String, the author's version of this pack |
 | nodes | Yes | List of nodes |
+| icon | No | Object, an image for the pack, see the icon section |
 | custom-properties | No | JSON object |
 
 ### format
@@ -334,6 +335,118 @@ does not catch this confusion on its own. Authors SHOULD check
 by hand that they have not put the format string in the version
 field.
 
+### icon
+
+Type: object. Required: no, on a pack, on a folder, and on a url
+node. The rules are the same in all three places. A pack or node
+with no icon is valid.
+
+Rule: icon, if present, MUST be an object. Inside icon, src is
+required, type and sizes are optional. src MUST be an https URL
+with a host, or a data URI for an image. type, if present, MUST
+be one of image/png, image/svg+xml, image/x-icon, image/webp,
+image/gif, or image/jpeg. sizes, if present, MUST be "any", or
+one or more sizes like "32x32" separated by single spaces, for
+example "16x16 32x32".
+
+This icon field is distinct from custom-properties. A
+custom-properties key called "icon" is a client-defined name,
+for example "globe". It is a string, and the standard does not
+interpret it. The icon field here is a standard object that
+points at an image. The two MAY appear together, and neither
+replaces the other.
+
+Readers MUST support PNG and SVG, SHOULD support ICO and WebP,
+and MAY support GIF and JPEG. Writers SHOULD use PNG or SVG,
+SHOULD NOT use JPEG, because JPEG has no transparency, and
+SHOULD NOT use animated GIFs. Data URIs SHOULD stay small,
+about 64 KB or less, because they bloat the pack file, and
+writers SHOULD prefer an https URL for a shared pack.
+
+Privacy guidance, informative: a reader SHOULD NOT fetch an
+icon URL on import. It SHOULD fetch an icon only when the icon
+is about to be shown, and SHOULD prefer a site favicon derived
+from the bookmark URL itself over a third-party icon host where
+possible. A data URI icon needs no fetch at all.
+
+Valid examples, non-normative, an https PNG icon:
+
+```json
+"icon": {
+  "src": "https://example.com/icons/news.png",
+  "type": "image/png",
+  "sizes": "32x32"
+}
+```
+
+Valid example, non-normative, an SVG data URI icon:
+
+```json
+"icon": {
+  "src": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Ccircle%20cx='8'%20cy='8'%20r='8'%20fill='%231f6feb'/%3E%3C/svg%3E",
+  "type": "image/svg+xml",
+  "sizes": "any"
+}
+```
+
+Valid example, non-normative, an ICO icon with two sizes:
+
+```json
+"icon": {
+  "src": "https://example.com/favicon.ico",
+  "type": "image/x-icon",
+  "sizes": "16x16 32x32"
+}
+```
+
+Invalid examples, non-normative, and why they fail:
+
+```json
+"icon": "globe"
+```
+
+This fails because icon MUST be an object, not a string. The
+string "globe" is valid inside custom-properties, not here.
+
+```json
+"icon": { "type": "image/png", "sizes": "32x32" }
+```
+
+This fails because src is missing. src is required when icon
+is present.
+
+```json
+"icon": { "src": "http://example.com/icon.png" }
+```
+
+This fails because an icon src MUST be https, not http.
+
+```json
+"icon": { "src": "javascript:alert(1)" }
+```
+
+This fails because javascript: is not an https URL or an image
+data URI.
+
+```json
+"icon": { "src": "https://example.com/icon.png", "type": "image/bmp" }
+```
+
+This fails because image/bmp is not in the allowed type list.
+
+```json
+"icon": { "src": "https://example.com/icon.png", "sizes": "large" }
+```
+
+This fails because sizes MUST be "any" or sizes like "32x32",
+not a word like "large".
+
+```json
+"icon": { "src": "data:text/plain,hello" }
+```
+
+This fails because the data URI is not an image data URI.
+
 ### nodes
 
 Type: list of nodes. Required: yes.
@@ -395,6 +508,7 @@ Table 2. Node fields by type. Normative.
 | url | Required, http or https URL | Must not be used as the link field for a folder |
 | nodes | Not used | Optional, list of nodes, defaults to empty |
 | source | Not used | Optional, https URL for a remote folder |
+| icon | Optional, object, see the icon section | Optional, object, see the icon section |
 | custom-properties | Optional, JSON object | Optional, JSON object |
 
 There is no separate "remote" node type in version 1.0. A remote
@@ -593,6 +707,19 @@ error. Exporting to Netscape HTML drops it, because Netscape HTML
 has no place to put it, and writers MUST NOT invent a Netscape
 encoding for it.
 
+### icon on a node
+
+Type: object. Required: no, on a folder node and on a url node.
+
+Rule: the same as the icon section under Pack fields above.
+icon, if present, MUST be an object with a required src that is
+an https URL or an image data URI, an optional type from the
+fixed list, and optional sizes. A string icon, a missing src, an
+http src, a javascript: src, a bad type, and a bad sizes value
+all fail, for the reasons given in that section. Readers MUST
+include icon in flattened output for a bookmark that has it,
+just as they include custom-properties.
+
 ## URL rules
 
 URLs are URIs as defined by [RFC3986], with the scheme
@@ -620,9 +747,10 @@ The updated field, if present, MUST be a string in ISO 8601
 [ISO8601] date or date-time form. A plain date such as
 "2026-10-27" is valid. A date-time such as "2026-10-27T15:00:00Z"
 is valid. A human-readable date such as "27 October 2026" is not
-valid under this rule, even though the schema and the validator
-only check that the value is a string. The prose rule in this
-section governs, and authors SHOULD check the date form by hand.
+valid under this rule. The schema and the validator both reject
+it by pattern, as well as the prose rule. The pattern checks
+shape, not the full calendar, so an impossible date like
+2026-02-30 would still pass the tools and fail the prose rule.
 
 ## Reader update guidance
 
@@ -714,8 +842,10 @@ Informative. This section is a checklist, not a new rule.
 2. Add a folder for each group, with a short title.
 3. Inside each folder, add url nodes with a title and an http or
    https url.
-4. Add description, source, updated, and version only if you
-   have them, using the forms in the field sections above.
+4. Add description, source, updated, version, and icon only
+   if you have them, using the forms in the field sections
+   above. Remember that icon is optional everywhere, and that
+   it is an object, not a string.
    Remember that version is the version of this pack, not the
    format version, which already lives in the format field.
 5. Add custom-properties only as an object, and only for client
@@ -777,6 +907,11 @@ field section above states the rule.
 - version written as a number, as an empty string, or as
   "open-bookmarks/1.0", which is the format version, not a pack
   version.
+- icon written as a string instead of an object, or with a
+  missing src, an http src, or a type outside the allowed list.
+- A custom-properties icon string mistaken for a standard icon
+  image. The two are different fields, as explained in the icon
+  section.
 
 ## See also
 

@@ -220,7 +220,7 @@ flattened links, and shows custom-properties where present.
   1.0. A newer minor version warns, a different major version
   does not warn here, because it is an error in `validate_pack`.
 - `validate_pack(pack)`: list of error strings, empty if valid.
-- `flatten_urls(pack)`: flat list of `title`, `url`, and `path`
+- `flatten_urls(pack)`: flat list of `title`, `url`, and `path`, plus `icon` when the bookmark has one
   (the folder path, joined with `/`), deduped by URL, in pack order.
   If a bookmark has `custom-properties`, that object is included
   in its flattened entry, unchanged.
