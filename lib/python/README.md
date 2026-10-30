@@ -214,6 +214,7 @@ flattened links, and shows custom-properties where present.
   pack dict out.
 - `format_version(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or None if missing.
+- `pack_author(pack)`: the person or group that made this pack, or None if missing. Pack level only, not the author of a linked page.
 - `pack_version(pack)`: the author `version` of this pack, for
   example `1.2.0`, or None if missing. Not the format version.
 - `format_warnings(pack)`: list of version warnings, empty for

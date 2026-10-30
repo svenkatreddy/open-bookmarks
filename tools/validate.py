@@ -14,6 +14,7 @@ Checks, in plain language:
   - any custom-properties present, on the pack or on a node,
     is a JSON object, not a string, number, array, or null
   - any version present, on the pack, is a non-empty string
+  - any author present, on the pack, is a non-empty string
   - any icon present, on the pack or on a node, is an object
     with a required src that is an https URL or an image data
     URI, an optional type from a fixed list, and optional sizes
@@ -235,6 +236,10 @@ def validate_pack(pack):
         version = pack["version"]
         if not isinstance(version, str) or not version.strip():
             errors.append("version must be a non-empty string")
+    if "author" in pack:
+        author = pack["author"]
+        if not isinstance(author, str) or not author.strip():
+            errors.append("author must be a non-empty string")
     if not isinstance(pack.get("title"), str) or not pack["title"].strip():
         errors.append("title is missing or empty")
     if not isinstance(pack.get("nodes"), list):

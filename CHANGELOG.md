@@ -55,6 +55,19 @@ Added:
   the copy on its own. No hash field was added: a hash was
   discussed and explicitly parked, not implemented. The format
   version is unchanged.
+- Pack `author` field, added to the 1.0 draft: an optional
+  non-empty string at pack root only, for example "FMHY".
+  It names the person or group that made the pack, the curator,
+  not the author of any linked page. Nodes do not inherit it,
+  and there is no author field on a folder or on a url node.
+  Readers should show it with the pack title, when present.
+  The validator, schema, and Python, JavaScript, and TypeScript
+  libraries validate it the same way as version, and each
+  library gains a packAuthor helper. Converters do not add an
+  author, because Netscape, Chrome, Firefox, and XBEL files
+  carry no pack author to map from, and export to Netscape
+  drops it, because Netscape HTML has no place for it. The
+  format version is unchanged.
 - Standard `icon` field, added to the 1.0 draft after the first
   push, not yet pushed again: an optional object on the pack, on
   folders, and on url nodes, with a required src that must be an

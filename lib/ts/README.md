@@ -187,6 +187,7 @@ flattened links, and shows custom-properties where present.
 - `loadPack(data)`: object or JSON string in, pack object out.
 - `formatVersion(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or null if missing.
+- `packAuthor(pack)`: the person or group that made this pack, or null if missing. Pack level only, not the author of a linked page.
 - `packVersion(pack)`: the author `version` of this pack, for
   example `1.2.0`, or null if missing. Not the format version.
 - `formatWarnings(pack)`: list of version warnings, empty for

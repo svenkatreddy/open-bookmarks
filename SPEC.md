@@ -138,6 +138,7 @@ Table 1. Pack fields. Normative.
 | --- | --- | --- |
 | format | Yes | String. MUST be exactly "open-bookmarks/1.0". |
 | title | Yes | String. MUST be non-empty after trimming surrounding whitespace. |
+| author | No | String. The person or group that made this pack. MUST be non-empty after trimming surrounding whitespace, if present. See below. |
 | version | No | String. The author's version of this pack. See Section 12. |
 | description | No | String. One or two sentences about what the pack is for. |
 | source | No | String. The URL this pack was published at, if known. MUST be https, as defined in Section 8. |
@@ -147,9 +148,20 @@ Table 1. Pack fields. Normative.
 | custom-properties | No | JSON object for client use only. See Section 7. |
 
 A reader MUST accept a pack even if description, source, updated,
-version, or icon are missing. A reader MUST reject a pack if format is
+version, icon, or author are missing. A reader MUST reject a pack if format is
 wrong, title is missing or empty, or nodes is not a list, subject
 to the minor version warning rule in Section 11.
+
+Author, at pack level only: author names the person or group that
+made the pack, the curator, not the author of any linked page.
+A link in a pack can come from many different sites, so a pack
+level author MUST NOT be read as the author of a link. Nodes do
+not inherit author from the pack, and there is no author field
+on a folder or on a url node in version 1.0. A reader SHOULD show
+author with the pack title, when it is present, for example in a
+pack list or a pack header. If a pack needs a link level author,
+that belongs in custom-properties, or in a future field, not by
+reusing the pack author.
 
 Unknown fields at any level MUST be ignored. That rule is how the
 format can grow later without breaking old readers. Readers MUST NOT

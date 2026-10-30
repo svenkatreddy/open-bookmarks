@@ -116,6 +116,7 @@ Table 1. Pack fields. Normative.
 | --- | --- | --- |
 | format | Yes | String |
 | title | Yes | String |
+| author | No | String, the person or group that made this pack |
 | description | No | String |
 | source | No | String, https URL |
 | updated | No | String, ISO 8601 date or date-time |
@@ -184,6 +185,32 @@ This fails because the string is empty.
 This fails because the string is empty after trimming whitespace.
 It passes a plain length check, but it fails the specification
 rule and the validator, and the specification rule governs.
+
+### author
+
+Type: string. Required: no, on the pack only.
+
+Rule: author, if present, MUST be a non-empty string after
+trimming surrounding whitespace. It names the person or group
+that made the pack, the curator, not the author of any linked
+page. A reader SHOULD show it with the pack title, when it is
+present. Nodes do not inherit it, and there is no author field
+on a folder or on a url node in version 1.0.
+
+Valid example, non-normative:
+
+```json
+"author": "FMHY"
+```
+
+Invalid example, non-normative, and why it fails:
+
+```json
+"author": "   "
+```
+
+This fails because author is only spaces, so after trimming
+there is nothing left to show.
 
 ### description
 

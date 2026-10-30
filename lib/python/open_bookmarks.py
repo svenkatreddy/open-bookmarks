@@ -6,6 +6,9 @@ Functions:
   format_version(pack) Return the pack format string, for example
                        open-bookmarks/1.0, or None if missing.
   pack_version(pack)   Return the author version of this pack, for
+  pack_author(pack)    Return the person or group that made this
+                       pack, or None if missing. This is the pack
+                       author, not the author of a linked page.
                        example 1.2.0, or None if missing. This is
                        not the format version. It is an optional
                        string, and a non-semantic version string
@@ -107,6 +110,21 @@ def pack_version(pack):
     """
     if isinstance(pack, dict):
         value = pack.get("version")
+        if isinstance(value, str) and value.strip():
+            return value
+    return None
+
+
+def pack_author(pack):
+    """Return the pack author, or None if missing.
+
+    This is the author in the author field at pack level, the
+    person or group that made the pack. It is passed through
+    unchanged by load_pack, because load_pack returns the pack
+    dict as is.
+    """
+    if isinstance(pack, dict):
+        value = pack.get("author")
         if isinstance(value, str) and value.strip():
             return value
     return None
@@ -259,6 +277,10 @@ def validate_pack(pack):
         version = pack["version"]
         if not isinstance(version, str) or not version.strip():
             errors.append("version must be a non-empty string")
+    if "author" in pack:
+        author = pack["author"]
+        if not isinstance(author, str) or not author.strip():
+            errors.append("author must be a non-empty string")
     if not isinstance(pack.get("title"), str) or not pack["title"].strip():
         errors.append("title is missing or empty")
     if not isinstance(pack.get("nodes"), list):
