@@ -52,6 +52,7 @@ export default defineConfig({
           { text: "Syntax", link: "/docs/SYNTAX" },
           { text: "Examples", link: "/docs/EXAMPLES" },
           { text: "Encrypted packs", link: "/docs/ENCRYPTION" },
+          { text: "Encrypt a pack", link: "/docs/ENCRYPT-TOOL" },
           { text: "Monorepo", link: "/docs/MONOREPO" },
           { text: "Deploy", link: "/docs/DEPLOY" },
           { text: "Versions", link: "/docs/versions" },

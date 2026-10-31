@@ -119,6 +119,13 @@ public key recipients, but that is not defined here, and a
 password pack from this version must keep decrypting with
 a password after that version lands.
 
+## Try it in your browser
+
+No command line is needed to make one. The docs site has a
+tool that encrypts a plain pack and decrypts an encrypted
+pack, all in your browser, with nothing uploaded:
+[Encrypt a pack](ENCRYPT-TOOL.md).
+
 ## Example file
 
 `packs/examples/encrypted-template.json` is a structural
