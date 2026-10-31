@@ -149,11 +149,15 @@ Table 1. Pack fields. Normative.
 
 A reader MUST accept a pack even if description, source, updated,
 version, icon, or author are missing. A reader MUST reject a pack if format is
-wrong, title is missing or empty, or nodes is not a list, subject
+wrong, title is missing or empty, author is present but empty or
+whitespace only, or nodes is not a list, subject
 to the minor version warning rule in Section 11.
 
 Author, at pack level only: author names the person or group that
 made the pack, the curator, not the author of any linked page.
+If author is present but empty after trimming surrounding
+whitespace, a reader MUST reject the pack, like an empty title.
+Missing author is not an error.
 A link in a pack can come from many different sites, so a pack
 level author MUST NOT be read as the author of a link. Nodes do
 not inherit author from the pack, and there is no author field

@@ -6,13 +6,13 @@ Functions:
   format_version(pack) Return the pack format string, for example
                        open-bookmarks/1.0, or None if missing.
   pack_version(pack)   Return the author version of this pack, for
-  pack_author(pack)    Return the person or group that made this
-                       pack, or None if missing. This is the pack
-                       author, not the author of a linked page.
                        example 1.2.0, or None if missing. This is
                        not the format version. It is an optional
                        string, and a non-semantic version string
                        is still valid.
+  pack_author(pack)    Return the person or group that made this
+                       pack, or None if missing. This is the pack
+                       author, not the author of a linked page.
   validate_pack(pack)  Return a list of error strings, empty if valid.
                        A newer minor version is a warning, not an
                        error, see format_warnings.

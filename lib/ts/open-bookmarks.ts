@@ -10,6 +10,9 @@
 //                     null if missing. This is not the format
 //                     version. It is an optional string, and a
 //                     non-semantic version string is still valid.
+// packAuthor(pack)    Return the person or group that made this
+//                     pack, or null if missing. Pack level only,
+//                     not the author of a linked page.
 // validatePack(pack)  Return a list of error strings, empty if valid.
 //                     A newer minor version is a warning, not an
 //                     error, see formatWarnings.

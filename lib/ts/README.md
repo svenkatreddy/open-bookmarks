@@ -67,7 +67,8 @@ console.log("format:", formatVersion(pack));
 
 The checks are the same as in the JavaScript library: format is
 "open-bookmarks/1.0" or a newer minor version, title is non-empty
-after trimming whitespace, nodes is a list, every node has a known
+after trimming whitespace, author, when present, is a non-empty
+string after trimming whitespace, nodes is a list, every node has a known
 type and a non-empty title, every url is http or https, every
 remote source is https, any custom-properties value is an object,
 and no folder sits at level 5 or deeper. The depth limit is 4
