@@ -31,8 +31,12 @@ prepared in `package.json` in this folder, with package version
 unpublished. Do not try `npm install open-bookmarks` until a
 release is announced. See `PUBLISHING.md` in this folder for the
 manual publish steps that are still needed. After publication, the
-import name stays `open-bookmarks`, and the entry points are the
-same file and its type declarations, as listed in `package.json`.
+import name stays `open-bookmarks`, and the entry points are
+`open-bookmarks` for the main library and
+`open-bookmarks/encrypt` for encryption, with
+`encrypt.mjs`, `encrypt.d.ts`, and `encrypt-example.mjs`
+as the three published encryption files, as listed in
+`package.json`.
 
 ## Load a pack from a string or a file
 
@@ -203,12 +207,16 @@ node lib/js/example.mjs
 It loads `packs/examples/news.json`, validates it, prints the
 flattened links, and shows custom-properties where present.
 
+A separate encryption example, with a test password only, is
+in `encrypt-example.mjs`, run as `node lib/js/encrypt-example.mjs`.
+
 ## Functions
 
 - `loadPack(data)`: object or JSON string in, pack object out.
 - `formatVersion(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or null if missing.
 - `packAuthor(pack)`: the person or group that made this pack, or null if missing. Pack level only, not the author of a linked page.
+- `encryptPack(pack, password)` and `decryptPack(encrypted, password)`: password based encryption, in `encrypt.mjs`, using only Web Crypto, PBKDF2 at 600,000 iterations and AES-256-GCM. See [docs/ENCRYPTION.md](https://github.com/svenkatreddy/open-bookmarks/blob/main/docs/ENCRYPTION.md). Or use the browser tool, [docs/ENCRYPT-TOOL.md](https://github.com/svenkatreddy/open-bookmarks/blob/main/docs/ENCRYPT-TOOL.md), with no code.
 - `packVersion(pack)`: the author `version` of this pack, for
   example `1.2.0`, or null if missing. Not the format version.
 - `formatWarnings(pack)`: list of version warnings, empty for

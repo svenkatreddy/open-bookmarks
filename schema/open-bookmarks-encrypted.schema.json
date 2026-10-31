@@ -1,0 +1,47 @@
+{
+    "$id": "https://example.com/open-bookmarks-encrypted.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": true,
+    "description": "An encrypted open-bookmarks pack, as defined in docs/ENCRYPTION.md. This schema checks the envelope structure only. It does not check that the ciphertext decrypts, and a placeholder template that passes this schema can still fail to decrypt, on purpose.",
+    "properties": {
+        "cipher": {
+            "const": "AES-256-GCM",
+            "type": "string"
+        },
+        "ciphertext": {
+            "pattern": "^([0-9a-fA-F]{2}){16,}$",
+            "type": "string"
+        },
+        "format": {
+            "const": "open-bookmarks/encrypted/1.0",
+            "type": "string"
+        },
+        "iterations": {
+            "const": 600000,
+            "type": "integer"
+        },
+        "iv": {
+            "pattern": "^[0-9a-fA-F]{24}$",
+            "type": "string"
+        },
+        "kdf": {
+            "const": "PBKDF2-HMAC-SHA-256",
+            "type": "string"
+        },
+        "salt": {
+            "pattern": "^[0-9a-fA-F]{32}$",
+            "type": "string"
+        }
+    },
+    "required": [
+        "format",
+        "cipher",
+        "kdf",
+        "iterations",
+        "salt",
+        "iv",
+        "ciphertext"
+    ],
+    "title": "open-bookmarks encrypted pack",
+    "type": "object"
+}

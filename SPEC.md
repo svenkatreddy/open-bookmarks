@@ -171,6 +171,40 @@ Unknown fields at any level MUST be ignored. That rule is how the
 format can grow later without breaking old readers. Readers MUST NOT
 rely on unknown fields.
 
+Encrypted packs are a separate file format, not a plain pack
+with an extra field. A whole plain pack is encrypted with a
+password, as defined in docs/ENCRYPTION.md, with format
+"open-bookmarks/encrypted/1.0". The machine-readable
+definition of that envelope is
+schema/open-bookmarks-encrypted.schema.json, which checks
+the envelope structure only, not that it decrypts. A plain
+pack reader MUST NOT try to read an encrypted pack as a
+pack. Decrypt it first, then validate the plain pack
+inside, with the normal rules.
+
+Normative, encrypted envelope: docs/ENCRYPTION.md is
+normative for this format, in addition to this section.
+An encrypted pack MUST be a JSON object with these fields:
+format MUST be exactly "open-bookmarks/encrypted/1.0",
+cipher MUST be exactly "AES-256-GCM", kdf MUST be exactly
+"PBKDF2-HMAC-SHA-256", iterations MUST be exactly 600000,
+salt MUST be hex for exactly 16 bytes, iv MUST be hex for
+exactly 12 bytes, and ciphertext MUST be hex for at least
+16 bytes, the GCM tag, plus the encrypted plain pack bytes.
+An encryptor MUST always write the full envelope above.
+A decryptor MUST reject any envelope where a present
+format, cipher, kdf, or iterations field differs from the
+values above, before any PBKDF2 work, and MUST reject an
+explicit null for any of those fields. The only exception
+is the legacy flat layout: a payload with only salt, iv,
+and ciphertext, and no format, cipher, kdf, or iterations
+field, MUST be accepted with the version 1.0 values above.
+Unknown fields in an encrypted envelope MUST be ignored,
+as in a plain pack. This encrypted format version is
+separate from the plain pack format version, and adding
+encrypted packs does not change the plain pack format
+version, which stays "open-bookmarks/1.0".
+
 Note, informative: the schema and the validator both reject a
 title that is only spaces, the schema by a pattern requiring a
 non-space character and the validator by trimming. The prose rule
