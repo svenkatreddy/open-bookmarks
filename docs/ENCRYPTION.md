@@ -46,11 +46,19 @@ Parameters, fixed for version 1.0 of this encrypted format:
 A decryptor must accept a flat payload with only salt, iv,
 and ciphertext, with the version 1.0 defaults, because that
 was the layout in the original prompt for this feature.
+That is the only exception to the all-or-none rule:
+either none of format, cipher, kdf, or iterations is
+present, or all four are present with the exact values
+above. A payload with some, but not all, of those four
+fields must be rejected, before any PBKDF2 work.
 Encryptors must always write the full envelope above, so a
 reader can tell what the file is and how it was made.
 A decryptor must reject any present format, cipher, kdf,
 or iterations field that differs from the values above,
 including an explicit null, before any PBKDF2 work.
+For interoperability, the password is UTF-8 with no
+normalization, the plaintext is UTF-8 JSON text, and
+AES-GCM is used with no additional authenticated data.
 
 ## What it is, and what it is not
 

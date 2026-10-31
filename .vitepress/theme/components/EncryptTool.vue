@@ -18,8 +18,12 @@ const plainOutput = ref('')
 const decryptError = ref('')
 const encryptBusy = ref(false)
 const decryptBusy = ref(false)
+const plainFilePending = ref(false)
+const encryptedFilePending = ref(false)
 let encryptRequestId = 0
 let decryptRequestId = 0
+let plainFileRequestId = 0
+let encryptedFileRequestId = 0
 
 async function onEncrypt() {
   const requestId = ++encryptRequestId
@@ -103,16 +107,34 @@ async function onDecrypt() {
 function onPlainFile(event) {
   const file = event.target.files && event.target.files[0]
   if (!file) return
+  const requestId = ++plainFileRequestId
+  plainFilePending.value = true
+  encryptError.value = ''
   file.text().then((text) => {
+    if (requestId !== plainFileRequestId) return
     plainText.value = text
+  }).catch(() => {
+    if (requestId !== plainFileRequestId) return
+    encryptError.value = 'Could not read that file. Try selecting it again.'
+  }).finally(() => {
+    if (requestId === plainFileRequestId) plainFilePending.value = false
   })
 }
 
 function onEncryptedFile(event) {
   const file = event.target.files && event.target.files[0]
   if (!file) return
+  const requestId = ++encryptedFileRequestId
+  encryptedFilePending.value = true
+  decryptError.value = ''
   file.text().then((text) => {
+    if (requestId !== encryptedFileRequestId) return
     encryptedText.value = text
+  }).catch(() => {
+    if (requestId !== encryptedFileRequestId) return
+    decryptError.value = 'Could not read that file. Try selecting it again.'
+  }).finally(() => {
+    if (requestId === encryptedFileRequestId) encryptedFilePending.value = false
   })
 }
 
@@ -155,7 +177,7 @@ async function copyText(text) {
       <label for="plain-confirm">Password again</label>
       <input id="plain-confirm" v-model="plainConfirm" :type="showPlainPassword ? 'text' : 'password'" autocomplete="new-password" />
     </p>
-    <p><button type="button" @click="onEncrypt" :disabled="encryptBusy">Encrypt this pack</button></p>
+    <p><button type="button" @click="onEncrypt" :disabled="encryptBusy || plainFilePending">Encrypt this pack</button></p>
     <p v-if="encryptError" class="error">{{ encryptError }}</p>
     <div v-if="encryptedOutput">
       <label for="encrypted-output">Encrypted pack</label>
@@ -180,7 +202,7 @@ async function copyText(text) {
       <input id="decrypt-password" v-model="decryptPassword" :type="showDecryptPassword ? 'text' : 'password'" autocomplete="current-password" />
       <label><input type="checkbox" v-model="showDecryptPassword" /> Show password</label>
     </p>
-    <p><button type="button" @click="onDecrypt" :disabled="decryptBusy">Decrypt this pack</button></p>
+    <p><button type="button" @click="onDecrypt" :disabled="decryptBusy || encryptedFilePending">Decrypt this pack</button></p>
     <p v-if="decryptError" class="error">{{ decryptError }}</p>
     <div v-if="plainOutput">
       <label for="plain-output">Decrypted plain pack</label>

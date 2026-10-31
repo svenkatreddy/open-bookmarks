@@ -21,7 +21,7 @@ project is meant to stay for now.
 - Docs: `docs/`, including `SYNTAX.md`, `EXAMPLES.md`,
   `ENCRYPTION.md`, `ENCRYPT-TOOL.md`, `DEPLOY.md`, and
   `versions.md`, rendered as a website with VitePress. The
-  old static `docs/index.html` entry page is gone.
+  docs site entry point is `docs/index.md`.
 - Example packs: `packs/examples/`, including News, Movies, Tech,
   Simple, Nested, Remote, Custom properties, Icons, and the
   Encrypted template, which is structural only, not a plain

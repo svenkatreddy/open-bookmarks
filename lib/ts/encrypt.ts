@@ -74,7 +74,7 @@ function hexDecode(value: unknown, field: string): Uint8Array {
   if (field === "iv" && bytes.length !== IV_BYTES) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");
   }
-  if (field === "ciphertext" && bytes.length === 0) {
+  if (field === "ciphertext" && bytes.length < 16) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");
   }
   return bytes;
@@ -123,6 +123,16 @@ export async function decryptPack(encryptedPackage: EncryptedPack, password: str
   if (typeof password !== "string" || !password) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");
   }
+  // All or none: a payload is either the legacy flat layout,
+  // with none of format, cipher, kdf, or iterations, or the
+  // full version 1.0 envelope, with all four present and
+  // exact. A partial envelope is neither, and is rejected
+  // here, before any PBKDF2 work.
+  const metadataFields = ["format", "cipher", "kdf", "iterations"] as const;
+  const presentMetadata = metadataFields.filter((field) => encryptedPackage[field] !== undefined);
+  if (presentMetadata.length > 0 && presentMetadata.length < metadataFields.length) {
+    throw new Error("Decryption failed. Invalid password or corrupted payload");
+  }
   if (encryptedPackage.format !== undefined && encryptedPackage.format !== ENCRYPTED_FORMAT) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");
   }
@@ -135,8 +145,7 @@ export async function decryptPack(encryptedPackage: EncryptedPack, password: str
   // Version 1.0 fixes iterations at exactly 600,000. A payload
   // with no iterations field is the legacy flat layout, and
   // gets that value. Any other value is rejected before any
-  // PBKDF2 work, so an untrusted payload cannot weaken the
-  // format or force unbounded work.
+  // PBKDF2 work.
   const iterations = encryptedPackage.iterations === undefined ? ENCRYPTION_ITERATIONS : encryptedPackage.iterations;
   if (iterations !== ENCRYPTION_ITERATIONS) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");

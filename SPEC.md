@@ -192,13 +192,25 @@ salt MUST be hex for exactly 16 bytes, iv MUST be hex for
 exactly 12 bytes, and ciphertext MUST be hex for at least
 16 bytes, the GCM tag, plus the encrypted plain pack bytes.
 An encryptor MUST always write the full envelope above.
-A decryptor MUST reject any envelope where a present
-format, cipher, kdf, or iterations field differs from the
-values above, before any PBKDF2 work, and MUST reject an
-explicit null for any of those fields. The only exception
-is the legacy flat layout: a payload with only salt, iv,
-and ciphertext, and no format, cipher, kdf, or iterations
-field, MUST be accepted with the version 1.0 values above.
+A decryptor MUST apply an all-or-none rule to the four
+metadata fields, before any PBKDF2 work: either none of
+format, cipher, kdf, or iterations is present, which is
+the legacy flat layout, or all four are present with the
+exact values above. A payload with some, but not all, of
+those four fields is neither form, and MUST be rejected,
+as MUST an envelope where a present field differs from
+the values above, or an explicit null for any of those
+fields. The legacy flat layout, a payload with only salt,
+iv, and ciphertext, and no format, cipher, kdf, or
+iterations field, MUST be accepted with the version 1.0
+values above.
+Byte level, for interoperability across implementations:
+the password MUST be encoded as UTF-8 with no
+normalization applied, the plaintext MUST be UTF-8 JSON
+text, and AES-GCM MUST be used with no additional
+authenticated data. A decryptor MUST decode the plaintext
+as UTF-8 with fatal errors, so malformed UTF-8 fails
+rather than parsing as a different pack.
 Unknown fields in an encrypted envelope MUST be ignored,
 as in a plain pack. This encrypted format version is
 separate from the plain pack format version, and adding

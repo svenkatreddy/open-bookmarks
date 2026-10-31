@@ -55,6 +55,7 @@ import argparse
 import getpass
 import hashlib
 import json
+import re
 import secrets
 import sys
 
@@ -135,7 +136,11 @@ def encrypt_pack(pack, password):
     iv = secrets.token_bytes(IV_BYTES)
     key = derive_key(password, salt, ENCRYPTION_ITERATIONS)
     iterations = ENCRYPTION_ITERATIONS
-    plaintext = json.dumps(pack, ensure_ascii=False).encode("utf-8")
+    try:
+        plaintext = json.dumps(pack, ensure_ascii=False, allow_nan=False).encode("utf-8")
+    except ValueError:
+        print("error: encrypt needs a pack with only valid JSON values", file=sys.stderr)
+        raise SystemExit(2)
     ciphertext = AESGCM(key).encrypt(iv, plaintext, None)
     return {
         "format": ENCRYPTED_FORMAT,
@@ -153,8 +158,17 @@ def decrypt_pack(payload, password):
     if not isinstance(payload, dict):
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
-    # Presence, not just value: an explicit null is not the
-    # same as an omitted legacy field, and must fail.
+    # All or none: either none of format, cipher, kdf, or
+    # iterations is present (the legacy flat layout), or all
+    # four are present with their exact values. A partial
+    # envelope is neither, and must fail before any PBKDF2
+    # work. Presence, not just value: an explicit null is not
+    # the same as an omitted legacy field, and must fail.
+    metadata_fields = ("format", "cipher", "kdf", "iterations")
+    present_metadata = [field for field in metadata_fields if field in payload]
+    if present_metadata and len(present_metadata) < len(metadata_fields):
+        print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
+        raise SystemExit(1)
     if "format" in payload and payload["format"] != ENCRYPTED_FORMAT:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
@@ -179,14 +193,28 @@ def decrypt_pack(payload, password):
     if not password:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
+    # Contiguous hex only: bytes.fromhex accepts whitespace
+    # inside a string, while the schema and the JS/TS readers
+    # reject it, so check the text first, before decoding.
+    def _hex_bytes(field):
+        value = payload[field]
+        if (
+            not isinstance(value, str)
+            or len(value) % 2 != 0
+            or not re.fullmatch(r"[0-9a-fA-F]*", value)
+        ):
+            print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
+            raise SystemExit(1)
+        return bytes.fromhex(value)
+
     try:
-        salt = bytes.fromhex(payload["salt"])
-        iv = bytes.fromhex(payload["iv"])
-        ciphertext = bytes.fromhex(payload["ciphertext"])
+        salt = _hex_bytes("salt")
+        iv = _hex_bytes("iv")
+        ciphertext = _hex_bytes("ciphertext")
     except (KeyError, TypeError, ValueError):
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
-    if len(salt) != SALT_BYTES or len(iv) != IV_BYTES or not ciphertext:
+    if len(salt) != SALT_BYTES or len(iv) != IV_BYTES or len(ciphertext) < 16:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
     key = derive_key(password, salt, iterations)

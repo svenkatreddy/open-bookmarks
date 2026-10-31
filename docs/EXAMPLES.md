@@ -296,7 +296,7 @@ Snippet, the whole file, because it is only an envelope:
 ```
 
 The envelope structure is defined in
-[../schema/open-bookmarks-encrypted.schema.json](../schema/open-bookmarks-encrypted.schema.json).
+[open-bookmarks-encrypted.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks-encrypted.schema.json).
 That schema checks structure only, so this placeholder template
 passes the schema and still fails to decrypt, which is expected.
 To make a real encrypted pack, use the browser tool in

@@ -20,7 +20,7 @@ labelled as non-normative, do not create rules. If an example and a
 normative rule disagree, the normative rule governs.
 
 The normative machine-readable definition is the JSON Schema in
-[../schema/open-bookmarks.schema.json](../schema/open-bookmarks.schema.json),
+[open-bookmarks.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks.schema.json),
 using JSON Schema draft 2020-12. The prose in [../SPEC.md](../SPEC.md)
 is the normative human-readable definition. The two are intended to
 agree. One known difference in strength is stated where it
@@ -160,7 +160,7 @@ Encrypted packs are not plain packs, and their format is not a
 valid value here. A file with format
 "open-bookmarks/encrypted/1.0" is a separate file format, defined
 in [ENCRYPTION.md](ENCRYPTION.md), with its own schema in
-[../schema/open-bookmarks-encrypted.schema.json](../schema/open-bookmarks-encrypted.schema.json).
+[open-bookmarks-encrypted.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks-encrypted.schema.json).
 Do not write that format value in a plain pack, and do not try
 to validate an encrypted pack with the plain pack validator.
 Decrypt it first, with the password, then validate the plain
@@ -963,11 +963,11 @@ field section above states the rule.
 
 - [../SPEC.md](../SPEC.md): the full specification, and the source
   of truth if this document and the specification disagree.
-- [../schema/open-bookmarks.schema.json](../schema/open-bookmarks.schema.json):
+- [open-bookmarks.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks.schema.json):
   the machine-readable definition, JSON Schema draft 2020-12.
 - [ENCRYPTION.md](ENCRYPTION.md): the separate encrypted pack
   format, and its own schema in
-  [../schema/open-bookmarks-encrypted.schema.json](../schema/open-bookmarks-encrypted.schema.json).
+  [open-bookmarks-encrypted.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks-encrypted.schema.json).
 - [ENCRYPT-TOOL.md](ENCRYPT-TOOL.md): encrypt a plain pack and
   decrypt an encrypted pack in your browser.
 - [EXAMPLES.md](EXAMPLES.md): every example pack, what it shows,

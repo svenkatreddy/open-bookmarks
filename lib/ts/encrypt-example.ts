@@ -36,5 +36,11 @@ try {
   if ((error as Error).message === "wrong password unexpectedly worked") {
     throw error;
   }
+  // Only the expected decryption error is a passing check.
+  // Any other failure, such as encryption being unavailable,
+  // must not be reported as a successful wrong-password test.
+  if ((error as Error).message !== "Decryption failed. Invalid password or corrupted payload") {
+    throw error;
+  }
   console.log("wrong password:", (error as Error).message);
 }
