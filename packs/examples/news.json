@@ -1,4 +1,5 @@
 {
+  "author": "open-bookmarks",
   "description": "A starter news pack. World news is inline, tech news lives in a second pack file so this one stays small.",
   "format": "open-bookmarks/1.0",
   "nodes": [
@@ -9,14 +10,14 @@
             "accent": "#1f6feb",
             "icon": "globe"
           },
+          "icon": {
+            "sizes": "16x16 32x32",
+            "src": "https://www.bbc.com/favicon.ico",
+            "type": "image/x-icon"
+          },
           "title": "BBC News",
           "type": "url",
-          "url": "https://www.bbc.com/news",
-          "icon": {
-            "src": "https://www.bbc.com/favicon.ico",
-            "type": "image/x-icon",
-            "sizes": "16x16 32x32"
-          }
+          "url": "https://www.bbc.com/news"
         },
         {
           "title": "Reuters",

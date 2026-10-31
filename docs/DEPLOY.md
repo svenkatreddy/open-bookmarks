@@ -98,6 +98,37 @@ the contents of `docs/` to the host, and serve `index.html` as
 the home page. The Markdown files will be served as files, as
 described for Vercel above, unless your host renders Markdown.
 
+## Two Vercel projects, and why one is disabled
+
+On PR #1, Vercel reported two failing projects for this repo:
+`open-bookmarks` and `python`. They fail for different reasons,
+and the fix in this repo is different for each.
+
+The `open-bookmarks` project is the docs site. If its Root
+Directory is left at the repo root, Vercel does not know the
+site lives in `docs/`, and it tries to detect a framework from
+the whole repo, which has no web app at its root. The root
+`vercel.json` in this repo fixes that case: framework
+detection off, no build command, no install command, and
+`outputDirectory` set to `docs`, so the repo root project
+serves `docs/index.html`. A project whose Root Directory is
+already set to `docs` in the dashboard does not read the root
+file at all, it reads `docs/vercel.json` instead, so this
+change does not break that setup.
+
+The `python` project is not a site at all. `lib/python` is a
+Python library for PyPI, not a web app, and Vercel cannot build
+it as one, because there is no API entry point in that folder.
+`lib/python/vercel.json` therefore disables Git deployments
+for a project rooted at that folder, with
+`git.deploymentEnabled` set to false. That file is not part of
+the Python package, `pyproject.toml` only ships the
+`open_bookmarks` module, it is only there to stop Vercel from
+trying to deploy the library. If that `python` project is
+still listed in Vercel, the clean dashboard fix is to delete
+it, or disconnect it from this repo. The file in the repo
+stops it from failing on every new push in the meantime.
+
 ## Still needed before any Vercel publish
 
 - A decision to publish docs on Vercel, from the repo owner.

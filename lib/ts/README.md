@@ -67,7 +67,8 @@ console.log("format:", formatVersion(pack));
 
 The checks are the same as in the JavaScript library: format is
 "open-bookmarks/1.0" or a newer minor version, title is non-empty
-after trimming whitespace, nodes is a list, every node has a known
+after trimming whitespace, author, when present, is a non-empty
+string after trimming whitespace, nodes is a list, every node has a known
 type and a non-empty title, every url is http or https, every
 remote source is https, any custom-properties value is an object,
 and no folder sits at level 5 or deeper. The depth limit is 4
@@ -187,6 +188,7 @@ flattened links, and shows custom-properties where present.
 - `loadPack(data)`: object or JSON string in, pack object out.
 - `formatVersion(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or null if missing.
+- `packAuthor(pack)`: the person or group that made this pack, or null if missing. Pack level only, not the author of a linked page.
 - `packVersion(pack)`: the author `version` of this pack, for
   example `1.2.0`, or null if missing. Not the format version.
 - `formatWarnings(pack)`: list of version warnings, empty for

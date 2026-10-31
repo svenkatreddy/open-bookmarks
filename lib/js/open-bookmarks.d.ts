@@ -25,6 +25,7 @@ export type PackNode = UrlNode | FolderNode;
 export interface Pack {
   format: string;
   title: string;
+  author?: string;
   description?: string;
   source?: string;
   updated?: string;
@@ -43,6 +44,7 @@ export interface FlatLink {
 export type FetchFunction = (url: string) => unknown;
 export function loadPack(data: unknown): Pack;
 export function formatVersion(pack: unknown): string | null;
+export function packAuthor(pack: unknown): string | null;
 export function packVersion(pack: unknown): string | null;
 export function formatWarnings(pack: unknown): string[];
 export function validatePack(pack: unknown): string[];

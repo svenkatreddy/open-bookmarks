@@ -35,7 +35,7 @@ Rules, shared by every converter:
     still valid and a reader falls back to a content diff by URL
     for update guidance. The one exception is open-bookmarks to
     open-bookmarks, which preserves the input pack's description,
-    source, updated, version, icon, and custom-properties, so a
+    source, updated, version, author, icon, and custom-properties, so a
     round trip does not lose them.
   - Icons: Netscape ICON_URI, when it is https, becomes an icon
     src, with type inferred from the file extension (.png, .svg,
@@ -658,7 +658,7 @@ def main(argv=None):
             "nodes": nodes,
         }
         if from_format == "open-bookmarks" and isinstance(data, dict):
-            for field in ("description", "source", "updated", "version", "icon", "custom-properties"):
+            for field in ("description", "source", "updated", "version", "author", "icon", "custom-properties"):
                 if field in data:
                     pack[field] = data[field]
         output = json.dumps(pack, indent=2, ensure_ascii=False) + "\n"
