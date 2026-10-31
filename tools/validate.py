@@ -218,6 +218,11 @@ def validate_pack(pack):
     errors = []
     if not isinstance(pack, dict):
         return ["pack is not a JSON object"]
+    if pack.get("format") == "open-bookmarks/encrypted/1.0":
+        return [
+            "this is an encrypted pack, not a plain pack: "
+            "decrypt it first, then validate the plain pack inside"
+        ]
     if pack.get("format") != "open-bookmarks/1.0" and not format_warnings(
         pack
     ):

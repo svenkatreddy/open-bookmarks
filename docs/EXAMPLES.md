@@ -1,9 +1,10 @@
 # Example packs
 
-All packs below are in [packs/examples/](https://github.com/svenkatreddy/open-bookmarks/tree/main/packs/examples).
-Every one passes `python3 tools/validate.py <file>`. Each snippet
+All plain packs below are in [packs/examples/](https://github.com/svenkatreddy/open-bookmarks/tree/main/packs/examples).
+Every plain pack passes `python3 tools/validate.py <file>`. Each snippet
 below is a short excerpt, not the whole file. Open the linked file
-for the full pack.
+for the full pack. The encrypted template at the end of this page
+is not a plain pack, and it does not pass that validator, by design.
 
 ## News
 
@@ -269,9 +270,43 @@ See [SYNTAX.md](SYNTAX.md) for the full icon rules, including
 the invalid cases: a string icon, a missing src, an http src, a
 javascript: src, a bad type, and a bad sizes value.
 
+## Encrypted template
+
+File: [packs/examples/encrypted-template.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/encrypted-template.json)
+
+What it shows: the shape of an encrypted pack envelope, and
+nothing else. It is not a plain pack, it has no title or nodes,
+and it must not be used as a pack. Its salt, IV, and ciphertext
+are placeholder hex values, not a real encryption, so decrypting
+it will fail, on purpose, and the plain pack validator will
+reject it with a single clear message: decrypt it first.
+
+Snippet, the whole file, because it is only an envelope:
+
+```json
+{
+  "cipher": "AES-256-GCM",
+  "ciphertext": "0000000000000000000000000000000000000000000000000000000000000000",
+  "format": "open-bookmarks/encrypted/1.0",
+  "iterations": 600000,
+  "iv": "000000000000000000000000",
+  "kdf": "PBKDF2-HMAC-SHA-256",
+  "salt": "00000000000000000000000000000000"
+}
+```
+
+The envelope structure is defined in
+[../schema/open-bookmarks-encrypted.schema.json](../schema/open-bookmarks-encrypted.schema.json).
+That schema checks structure only, so this placeholder template
+passes the schema and still fails to decrypt, which is expected.
+To make a real encrypted pack, use the browser tool in
+[ENCRYPT-TOOL.md](ENCRYPT-TOOL.md), the JavaScript or
+TypeScript `encryptPack` function, or the Python tool in
+`tools/encrypt.py`, as described in [ENCRYPTION.md](ENCRYPTION.md).
+
 ## How to check an example
 
-Run the validator on any file above, from the repo root:
+Run the validator on any plain file above, from the repo root:
 
 ```sh
 python3 tools/validate.py packs/examples/simple.json
@@ -279,4 +314,7 @@ python3 tools/validate.py packs/examples/simple.json
 
 A valid pack prints "valid:" followed by the file name. A pack
 that fails prints each error on its own line and exits with a
-non-zero code.
+non-zero code. Do not run that validator on
+`packs/examples/encrypted-template.json` expecting a valid pack.
+It will print that it is an encrypted pack, not a plain pack,
+and exit with a non-zero code, which is the correct result.

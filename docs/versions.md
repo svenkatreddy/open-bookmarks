@@ -37,3 +37,12 @@ the draft after the first push, as an optional object on packs,
 folders, and url nodes. The format version did not change. Tags
 and added were not added with icon, and a hash field remains
 parked. This icon update has not been pushed again yet.
+
+Draft note, 2026-10-31: password encrypted packs were added to
+the draft, as a separate file format
+`open-bookmarks/encrypted/1.0`, not as a field on a plain pack.
+The plain pack format version did not change. Encryption is
+password only, with PBKDF2 at 600,000 iterations and
+AES-256-GCM, and it is defined in `docs/ENCRYPTION.md`, with
+its own schema, a browser tool, and JavaScript, TypeScript,
+and Python tools. React Native support is still undecided.

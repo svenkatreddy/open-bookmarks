@@ -203,13 +203,16 @@ node lib/js/example.mjs
 It loads `packs/examples/news.json`, validates it, prints the
 flattened links, and shows custom-properties where present.
 
+A separate encryption example, with a test password only, is
+in `encrypt-example.mjs`, run as `node lib/js/encrypt-example.mjs`.
+
 ## Functions
 
 - `loadPack(data)`: object or JSON string in, pack object out.
 - `formatVersion(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or null if missing.
 - `packAuthor(pack)`: the person or group that made this pack, or null if missing. Pack level only, not the author of a linked page.
-- `encryptPack(pack, password)` and `decryptPack(encrypted, password)`: password based encryption, in `encrypt.mjs`, using only Web Crypto, PBKDF2 at 600,000 iterations and AES-256-GCM. See `docs/ENCRYPTION.md`.
+- `encryptPack(pack, password)` and `decryptPack(encrypted, password)`: password based encryption, in `encrypt.mjs`, using only Web Crypto, PBKDF2 at 600,000 iterations and AES-256-GCM. See `docs/ENCRYPTION.md`. Or use the browser tool, `docs/ENCRYPT-TOOL.md`, with no code.
 - `packVersion(pack)`: the author `version` of this pack, for
   example `1.2.0`, or null if missing. Not the format version.
 - `formatWarnings(pack)`: list of version warnings, empty for

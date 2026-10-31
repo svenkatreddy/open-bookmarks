@@ -174,9 +174,13 @@ rely on unknown fields.
 Encrypted packs are a separate file format, not a plain pack
 with an extra field. A whole plain pack is encrypted with a
 password, as defined in docs/ENCRYPTION.md, with format
-"open-bookmarks/encrypted/1.0". A plain pack reader MUST NOT
-try to read an encrypted pack as a pack. Decrypt it first,
-then validate the plain pack inside, with the normal rules.
+"open-bookmarks/encrypted/1.0". The machine-readable
+definition of that envelope is
+schema/open-bookmarks-encrypted.schema.json, which checks
+the envelope structure only, not that it decrypts. A plain
+pack reader MUST NOT try to read an encrypted pack as a
+pack. Decrypt it first, then validate the plain pack
+inside, with the normal rules.
 
 Note, informative: the schema and the validator both reject a
 title that is only spaces, the schema by a pattern requiring a

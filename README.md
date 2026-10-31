@@ -216,6 +216,7 @@ what it shows, and a short snippet of each. The packs include:
 - [packs/examples/custom-properties.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/custom-properties.json)
 - [packs/examples/icon.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/icon.json)
 - [packs/examples/tech.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/tech.json)
+- [packs/examples/encrypted-template.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/encrypted-template.json), structural only, not a plain pack, see [docs/ENCRYPTION.md](docs/ENCRYPTION.md)
 
 ## Monorepo
 

@@ -13,7 +13,8 @@ of truth for the format. The [README](../README.md) shows a small
 example pack and how to run the converters. For a field by field
 syntax guide, see [SYNTAX.md](SYNTAX.md). For every example pack,
 see [EXAMPLES.md](EXAMPLES.md). For password encrypted packs,
-see [ENCRYPTION.md](ENCRYPTION.md). For how this repo holds several
+see [ENCRYPTION.md](ENCRYPTION.md), or try the browser tool in
+[ENCRYPT-TOOL.md](ENCRYPT-TOOL.md). For how this repo holds several
 libraries side by side, see [MONOREPO.md](MONOREPO.md).
 
 In short:

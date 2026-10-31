@@ -8,27 +8,40 @@ project is meant to stay for now.
 ## What lives here
 
 - Spec and schema: `SPEC.md` at the repo root, and
-  `schema/open-bookmarks.schema.json`. These are shared. No
-  library defines the format on its own.
-- Tools: `tools/convert.py` and `tools/validate.py`, with test
-  fixtures in `tools/tests/fixtures/`. These are shared test
-  material for every library.
+  `schema/open-bookmarks.schema.json` for plain packs plus
+  `schema/open-bookmarks-encrypted.schema.json` for encrypted
+  pack envelopes. These are shared. No library defines the
+  format on its own.
+- Tools: `tools/convert.py`, `tools/validate.py`, and
+  `tools/encrypt.py`, with test fixtures in
+  `tools/tests/fixtures/`. These are shared test material
+  for every library. The validator and converter both reject
+  an encrypted pack with a clear decrypt-first message,
+  instead of treating it as a plain pack.
 - Docs: `docs/`, including `SYNTAX.md`, `EXAMPLES.md`,
-  `DEPLOY.md`, `versions.md`, and the HTML entry page
-  `index.html`.
+  `ENCRYPTION.md`, `ENCRYPT-TOOL.md`, `DEPLOY.md`, and
+  `versions.md`, rendered as a website with VitePress. The
+  old static `docs/index.html` entry page is gone.
 - Example packs: `packs/examples/`, including News, Movies, Tech,
-  Simple, Nested, Remote, and Custom properties. Every library is
-  tested against the same packs, so a change in one library can
-  be checked against the same files as a change in another.
+  Simple, Nested, Remote, Custom properties, Icons, and the
+  Encrypted template, which is structural only, not a plain
+  pack. Every library is tested against the same plain packs,
+  so a change in one library can be checked against the same
+  files as a change in another.
 - Libraries, each in its own folder under `lib/`:
   - Python: `lib/python/`, single file `open_bookmarks.py`,
     package file `pyproject.toml`, README, example, and
-    publishing note.
+    publishing note. Password encryption is not a library
+    function here, because it needs the cryptography package.
+    It is the separate CLI tool `tools/encrypt.py`.
   - JavaScript: `lib/js/`, single file `open-bookmarks.mjs`,
     type declarations `open-bookmarks.d.ts`, package file
-    `package.json`, README, example, and publishing note.
+    `package.json`, README, example, and publishing note,
+    plus `encrypt.mjs`, `encrypt.d.ts`, and
+    `encrypt-example.mjs` for password encrypted packs.
   - TypeScript: `lib/ts/`, single file `open-bookmarks.ts`,
-    README, and example. It uses only erasable TypeScript syntax,
+    README, and example, plus `encrypt.ts` for password
+    encrypted packs. It uses only erasable TypeScript syntax,
     so it can run under Node type stripping and can be type
     checked with a TypeScript compiler.
 
