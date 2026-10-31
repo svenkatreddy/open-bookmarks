@@ -74,10 +74,8 @@ ships the `open_bookmarks` module.
 
 GitHub Pages is not set up for the VitePress build in this
 repo yet. The old static route, serving `docs/` directly,
-is gone with the old `docs/index.html`, which was deleted
-in the follow-up PR that fixed the PR #2 review comments,
-not in the original VitePress PR, where it was still on
-`main` by mistake. Pages would need a build action that
+is gone, the old `docs/index.html` is deleted. Pages would
+need a build action that
 runs `npm run docs:build` and publishes `.vitepress/dist/`,
 which is a separate step, not done here. Do not set Pages
 to serve `/docs` as it is now, that folder has no index
@@ -92,7 +90,9 @@ output, with no extension in the URL. A host must map an
 extensionless path to its `.html` file, like Vercel does
 with `cleanUrls` in `vercel.json`, or with a rewrite rule.
 If your host cannot do that, do not upload this output
-unchanged, or every page except the home page will 404.
+unchanged, or non-index page routes may 404, while
+directory pages like `/docs/` still resolve to their own
+index page.
 Instead, either use a host with clean URL or rewrite
 support, or rebuild with `cleanUrls` set to false in
 `.vitepress/config.mts`, which makes every page link end
