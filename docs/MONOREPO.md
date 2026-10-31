@@ -40,8 +40,8 @@ project is meant to stay for now.
     plus `encrypt.mjs`, `encrypt.d.ts`, and
     `encrypt-example.mjs` for password encrypted packs.
   - TypeScript: `lib/ts/`, single file `open-bookmarks.ts`,
-    README, and example, plus `encrypt.ts` for password
-    encrypted packs. It uses only erasable TypeScript syntax,
+    README, and example, plus `encrypt.ts` and
+    `encrypt-example.ts` for password encrypted packs. It uses only erasable TypeScript syntax,
     so it can run under Node type stripping and can be type
     checked with a TypeScript compiler.
 

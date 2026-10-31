@@ -215,7 +215,7 @@ flattened links, and shows custom-properties where present.
 - `format_version(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or None if missing.
 - `pack_author(pack)`: the person or group that made this pack, or None if missing. Pack level only, not the author of a linked page.
-- Password encryption is a separate CLI tool, `tools/encrypt.py`, not a library function, because Python needs the `cryptography` package for AES-GCM. See `docs/ENCRYPTION.md`. Or use the browser tool, `docs/ENCRYPT-TOOL.md`, with no code.
+- Password encryption is a separate CLI tool, `tools/encrypt.py`, not a library function, because Python needs the `cryptography` package for AES-GCM. See [docs/ENCRYPTION.md](../../docs/ENCRYPTION.md). Or use the browser tool, [docs/ENCRYPT-TOOL.md](../../docs/ENCRYPT-TOOL.md), with no code.
 - `pack_version(pack)`: the author `version` of this pack, for
   example `1.2.0`, or None if missing. Not the format version.
 - `format_warnings(pack)`: list of version warnings, empty for

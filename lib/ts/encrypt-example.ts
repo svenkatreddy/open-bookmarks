@@ -23,11 +23,18 @@ console.log("iv bytes:", encrypted.iv.length / 2);
 
 const decrypted = await decryptPack(encrypted, password);
 console.log("decrypted title:", decrypted.title);
-console.log("validation errors:", validatePack(decrypted));
+const errors = validatePack(decrypted);
+console.log("validation errors:", errors);
+if (errors.length) {
+  throw new Error(errors.join("\n"));
+}
 
 try {
   await decryptPack(encrypted, "wrong-password");
-  console.log("wrong password unexpectedly worked");
+  throw new Error("wrong password unexpectedly worked");
 } catch (error) {
+  if ((error as Error).message === "wrong password unexpectedly worked") {
+    throw error;
+  }
   console.log("wrong password:", (error as Error).message);
 }

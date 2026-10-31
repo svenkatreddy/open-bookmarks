@@ -22,7 +22,7 @@ writing AES-GCM in pure Python to fake one would be slow,
 unaudited, and easy to get wrong. This tool therefore needs
 the cryptography package, and it refuses to run without it:
 
-  pip install cryptography
+  python3 -m pip install cryptography
 
 With that package, the payload is byte for byte compatible
 with lib/js/encrypt.mjs and lib/ts/encrypt.ts: PBKDF2 with
@@ -78,16 +78,25 @@ def require_cryptography():
         print(
             "error: the cryptography package is required, "
             "Python's standard library has no AES-GCM. "
-            "Install it with: pip install cryptography",
+            "Install it with: python3 -m pip install cryptography",
             file=sys.stderr,
         )
         raise SystemExit(2)
 
 
 def get_password(args):
-    if args.password:
+    # An explicitly empty --password is an error, not a prompt.
+    # Only an omitted --password, which is None, prompts.
+    if args.password is not None:
+        if not args.password:
+            print("error: password must not be empty", file=sys.stderr)
+            raise SystemExit(2)
         return args.password
-    password = getpass.getpass("Password: ")
+    try:
+        password = getpass.getpass("Password: ")
+    except (EOFError, KeyboardInterrupt):
+        print("error: password must not be empty", file=sys.stderr)
+        raise SystemExit(2)
     if not password:
         print("error: password must not be empty", file=sys.stderr)
         raise SystemExit(2)
@@ -111,14 +120,18 @@ def save_json(path, data):
         handle.write("\n")
 
 
-def encrypt_pack(pack, password, iterations=ENCRYPTION_ITERATIONS):
+def encrypt_pack(pack, password):
     require_cryptography()
     if not isinstance(pack, dict):
         print("error: encrypt needs a bookmark pack object", file=sys.stderr)
         raise SystemExit(2)
+    if not password:
+        print("error: password must not be empty", file=sys.stderr)
+        raise SystemExit(2)
     salt = secrets.token_bytes(SALT_BYTES)
     iv = secrets.token_bytes(IV_BYTES)
-    key = derive_key(password, salt, iterations)
+    key = derive_key(password, salt, ENCRYPTION_ITERATIONS)
+    iterations = ENCRYPTION_ITERATIONS
     plaintext = json.dumps(pack, ensure_ascii=False).encode("utf-8")
     ciphertext = AESGCM(key).encrypt(iv, plaintext, None)
     return {
@@ -137,17 +150,30 @@ def decrypt_pack(payload, password):
     if not isinstance(payload, dict):
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
-    if payload.get("format") not in (None, ENCRYPTED_FORMAT):
+    # Presence, not just value: an explicit null is not the
+    # same as an omitted legacy field, and must fail.
+    if "format" in payload and payload["format"] != ENCRYPTED_FORMAT:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
-    if payload.get("cipher") not in (None, ENCRYPTION_CIPHER):
+    if "cipher" in payload and payload["cipher"] != ENCRYPTION_CIPHER:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
-    if payload.get("kdf") not in (None, ENCRYPTION_KDF):
+    if "kdf" in payload and payload["kdf"] != ENCRYPTION_KDF:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
-    iterations = payload.get("iterations", ENCRYPTION_ITERATIONS)
-    if not isinstance(iterations, int) or iterations < 1:
+    # Version 1.0 fixes iterations at exactly 600,000. A
+    # payload with no iterations field is the legacy flat
+    # layout, and gets that value. Any other value, including
+    # a bool, which is an int subclass in Python, is rejected
+    # before any PBKDF2 work.
+    if "iterations" in payload:
+        iterations = payload["iterations"]
+        if type(iterations) is not int or iterations != ENCRYPTION_ITERATIONS:
+            print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
+            raise SystemExit(1)
+    else:
+        iterations = ENCRYPTION_ITERATIONS
+    if not password:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
     try:
@@ -181,19 +207,27 @@ def main(argv=None):
         cmd.add_argument("--input", required=True, help="Input JSON file")
         cmd.add_argument("--output", required=True, help="Output JSON file")
         cmd.add_argument("--password", help="Password. If omitted, it is asked for on the terminal.")
-    encrypt_parser = sub.choices["encrypt"]
-    encrypt_parser.add_argument("--iterations", type=int, default=ENCRYPTION_ITERATIONS,
-                                help="PBKDF2 iterations, default 600000")
     args = parser.parse_args(argv)
     password = get_password(args)
-    data = load_json(args.input)
-    if args.command == "encrypt":
-        if args.iterations < 1:
-            print("error: iterations must be at least 1", file=sys.stderr)
-            return 2
-        save_json(args.output, encrypt_pack(data, password, args.iterations))
-    else:
-        save_json(args.output, decrypt_pack(data, password))
+    try:
+        data = load_json(args.input)
+    except OSError as exc:
+        print("error: cannot read input: %s" % exc, file=sys.stderr)
+        return 2
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        if args.command == "decrypt":
+            print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
+            return 1
+        print("error: cannot read input: %s" % exc, file=sys.stderr)
+        return 2
+    try:
+        if args.command == "encrypt":
+            save_json(args.output, encrypt_pack(data, password))
+        else:
+            save_json(args.output, decrypt_pack(data, password))
+    except OSError as exc:
+        print("error: cannot write output: %s" % exc, file=sys.stderr)
+        return 2
     return 0
 
 

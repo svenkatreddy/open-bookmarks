@@ -19,6 +19,98 @@ const decryptPassword = ref('')
 const showDecryptPassword = ref(false)
 const plainOutput = ref('')
 const decryptError = ref('')
+const encryptBusy = ref(false)
+const decryptBusy = ref(false)
+let encryptRequestId = 0
+let decryptRequestId = 0
+
+function validatePack(pack) {
+  const errors = []
+  if (!pack || typeof pack !== 'object' || Array.isArray(pack)) {
+    return ['pack is not a JSON object']
+  }
+  if (pack.format !== 'open-bookmarks/1.0') {
+    errors.push('format must be open-bookmarks/1.0')
+  }
+  if (typeof pack.title !== 'string' || pack.title.trim() === '') {
+    errors.push('title is missing or empty')
+  }
+  if (typeof pack.description !== 'undefined' && typeof pack.description !== 'string') {
+    errors.push('description must be a string')
+  }
+  if (typeof pack.source !== 'undefined') {
+    try {
+      const url = new URL(pack.source)
+      if (url.protocol !== 'https:') errors.push('source must be https')
+    } catch {
+      errors.push('source must be https')
+    }
+  }
+  if (typeof pack.version !== 'undefined' && (typeof pack.version !== 'string' || pack.version.trim() === '')) {
+    errors.push('version must be a non-empty string')
+  }
+  if (typeof pack.author !== 'undefined' && (typeof pack.author !== 'string' || pack.author.trim() === '')) {
+    errors.push('author must be a non-empty string')
+  }
+  if (typeof pack['custom-properties'] !== 'undefined' && (typeof pack['custom-properties'] !== 'object' || pack['custom-properties'] === null || Array.isArray(pack['custom-properties']))) {
+    errors.push('custom-properties must be an object')
+  }
+  if (typeof pack.icon !== 'undefined' && (typeof pack.icon !== 'object' || pack.icon === null || typeof pack.icon.src !== 'string')) {
+    errors.push('icon must be an object with a src')
+  }
+  if (!Array.isArray(pack.nodes)) {
+    errors.push('nodes is missing or not a list')
+    return errors
+  }
+  const seenSources = new Set()
+  function validateNodes(nodes, level, where) {
+    for (const node of nodes) {
+      if (!node || typeof node !== 'object' || Array.isArray(node)) {
+        errors.push(where + ': node is not an object')
+        continue
+      }
+      if (node.type !== 'folder' && node.type !== 'url') {
+        errors.push(where + ': node type must be folder or url')
+        continue
+      }
+      if (typeof node.title !== 'string' || node.title.trim() === '') {
+        errors.push(where + ': node title is missing or empty')
+      }
+      if (node.type === 'url') {
+        try {
+          const url = new URL(node.url)
+          if (url.protocol !== 'http:' && url.protocol !== 'https:') errors.push(where + ': url must be http or https')
+        } catch {
+          errors.push(where + ': url is not valid')
+        }
+      }
+      if (node.type === 'folder') {
+        if (level + 1 > 4) {
+          errors.push(where + ': folder depth over 4')
+        }
+        if (typeof node.source !== 'undefined') {
+          try {
+            const url = new URL(node.source)
+            if (url.protocol !== 'https:') errors.push(where + ': source must be https')
+            if (seenSources.has(node.source)) errors.push(where + ': remote source cycle')
+            seenSources.add(node.source)
+          } catch {
+            errors.push(where + ': source must be https')
+          }
+        }
+        if (typeof node.nodes !== 'undefined') {
+          if (!Array.isArray(node.nodes)) {
+            errors.push(where + ': nodes is not a list')
+          } else {
+            validateNodes(node.nodes, level + 1, where)
+          }
+        }
+      }
+    }
+  }
+  validateNodes(pack.nodes, 0, 'nodes')
+  return errors
+}
 
 function toHex(buffer) {
   return Array.from(new Uint8Array(buffer))
@@ -55,6 +147,8 @@ async function getKey(password, salt) {
 }
 
 async function onEncrypt() {
+  const requestId = ++encryptRequestId
+  encryptBusy.value = true
   encryptError.value = ''
   encryptedOutput.value = ''
   let pack
@@ -62,30 +156,23 @@ async function onEncrypt() {
     pack = JSON.parse(plainText.value)
   } catch {
     encryptError.value = 'That is not valid JSON.'
+    encryptBusy.value = false
     return
   }
-  if (!pack || typeof pack !== 'object' || Array.isArray(pack)) {
-    encryptError.value = 'A plain pack must be a JSON object.'
-    return
-  }
-  if (pack.format !== 'open-bookmarks/1.0') {
-    encryptError.value = 'A plain pack must have format open-bookmarks/1.0.'
-    return
-  }
-  if (typeof pack.title !== 'string' || pack.title.trim() === '') {
-    encryptError.value = 'A plain pack must have a non-empty title.'
-    return
-  }
-  if (!Array.isArray(pack.nodes)) {
-    encryptError.value = 'A plain pack must have a nodes list.'
+  const validationErrors = validatePack(pack)
+  if (validationErrors.length) {
+    encryptError.value = 'Pack is not valid: ' + validationErrors.join('; ')
+    encryptBusy.value = false
     return
   }
   if (!plainPassword.value) {
     encryptError.value = 'Enter a password.'
+    encryptBusy.value = false
     return
   }
   if (plainPassword.value !== plainConfirm.value) {
     encryptError.value = 'The two passwords do not match.'
+    encryptBusy.value = false
     return
   }
   try {
@@ -97,6 +184,7 @@ async function onEncrypt() {
       key,
       new TextEncoder().encode(JSON.stringify(pack))
     )
+    if (requestId !== encryptRequestId) return
     const envelope = {
       format: ENCRYPTED_FORMAT,
       cipher: CIPHER,
@@ -110,11 +198,16 @@ async function onEncrypt() {
     const slug = pack.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'pack'
     encryptFileName.value = slug + '-encrypted.json'
   } catch {
+    if (requestId !== encryptRequestId) return
     encryptError.value = 'Encryption failed in this browser. Try a browser with Web Crypto support.'
+  } finally {
+    if (requestId === encryptRequestId) encryptBusy.value = false
   }
 }
 
 async function onDecrypt() {
+  const requestId = ++decryptRequestId
+  decryptBusy.value = true
   decryptError.value = ''
   plainOutput.value = ''
   let encrypted
@@ -122,19 +215,29 @@ async function onDecrypt() {
     encrypted = JSON.parse(encryptedText.value)
   } catch {
     decryptError.value = 'That is not valid JSON.'
+    decryptBusy.value = false
     return
   }
   if (!decryptPassword.value) {
     decryptError.value = 'Enter a password.'
+    decryptBusy.value = false
     return
   }
   try {
-    if (!encrypted || encrypted.format !== ENCRYPTED_FORMAT) {
+    if (!encrypted || typeof encrypted !== 'object' || Array.isArray(encrypted)) {
       throw new Error('not encrypted')
     }
-    if (encrypted.cipher && encrypted.cipher !== CIPHER) throw new Error('cipher')
-    if (encrypted.kdf && encrypted.kdf !== KDF) throw new Error('kdf')
-    const iterations = encrypted.iterations || ITERATIONS
+    // Presence, not truthiness: a defined format must match,
+    // but an omitted format is the legacy flat layout and is
+    // allowed. The same rule applies to cipher, kdf, and
+    // iterations, which must be exactly 600,000 when present.
+    if ('format' in encrypted && encrypted.format !== ENCRYPTED_FORMAT) {
+      throw new Error('format')
+    }
+    if ('cipher' in encrypted && encrypted.cipher !== CIPHER) throw new Error('cipher')
+    if ('kdf' in encrypted && encrypted.kdf !== KDF) throw new Error('kdf')
+    if ('iterations' in encrypted && encrypted.iterations !== ITERATIONS) throw new Error('iterations')
+    const iterations = ITERATIONS
     const salt = fromHex(encrypted.salt)
     const iv = fromHex(encrypted.iv)
     const ciphertext = fromHex(encrypted.ciphertext)
@@ -156,10 +259,20 @@ async function onDecrypt() {
       ['decrypt']
     )
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext)
-    const pack = JSON.parse(new TextDecoder().decode(plain))
+    const pack = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(plain))
+    const validationErrors = validatePack(pack)
+    if (validationErrors.length) {
+      if (requestId !== decryptRequestId) return
+      decryptError.value = 'Decrypted pack is not a valid plain pack: ' + validationErrors.join('; ')
+      return
+    }
+    if (requestId !== decryptRequestId) return
     plainOutput.value = JSON.stringify(pack, null, 2)
   } catch {
+    if (requestId !== decryptRequestId) return
     decryptError.value = 'Decryption failed. Invalid password or corrupted payload'
+  } finally {
+    if (requestId === decryptRequestId) decryptBusy.value = false
   }
 }
 
@@ -218,7 +331,7 @@ async function copyText(text) {
       <label for="plain-confirm">Password again</label>
       <input id="plain-confirm" v-model="plainConfirm" :type="showPlainPassword ? 'text' : 'password'" autocomplete="new-password" />
     </p>
-    <p><button type="button" @click="onEncrypt">Encrypt this pack</button></p>
+    <p><button type="button" @click="onEncrypt" :disabled="encryptBusy">Encrypt this pack</button></p>
     <p v-if="encryptError" class="error">{{ encryptError }}</p>
     <div v-if="encryptedOutput">
       <label for="encrypted-output">Encrypted pack</label>
@@ -243,7 +356,7 @@ async function copyText(text) {
       <input id="decrypt-password" v-model="decryptPassword" :type="showDecryptPassword ? 'text' : 'password'" autocomplete="current-password" />
       <label><input type="checkbox" v-model="showDecryptPassword" /> Show password</label>
     </p>
-    <p><button type="button" @click="onDecrypt">Decrypt this pack</button></p>
+    <p><button type="button" @click="onDecrypt" :disabled="decryptBusy">Decrypt this pack</button></p>
     <p v-if="decryptError" class="error">{{ decryptError }}</p>
     <div v-if="plainOutput">
       <label for="plain-output">Decrypted plain pack</label>

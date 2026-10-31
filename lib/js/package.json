@@ -6,12 +6,12 @@
   "description": "A small, dependency free library for open-bookmarks packs: load, validate, flatten, and expand remote folders.",
   "exports": {
     ".": {
-      "import": "./open-bookmarks.mjs",
-      "types": "./open-bookmarks.d.ts"
+      "types": "./open-bookmarks.d.ts",
+      "import": "./open-bookmarks.mjs"
     },
     "./encrypt": {
-      "import": "./encrypt.mjs",
-      "types": "./encrypt.d.ts"
+      "types": "./encrypt.d.ts",
+      "import": "./encrypt.mjs"
     },
     "./package.json": "./package.json"
   },

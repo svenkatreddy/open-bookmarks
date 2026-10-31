@@ -22,13 +22,18 @@ pack inside, with the normal validator.
 
 Parameters, fixed for version 1.0 of this encrypted format:
 
-- Key derivation: PBKDF2 with SHA-256, 600,000 iterations.
-  That is the OWASP minimum for PBKDF2 with SHA-256, and it
-  is the only key derivation available in the native Web
-  Crypto API, which is why it was chosen, not because it is
-  stronger than Argon2. Argon2 is stronger against GPU
-  brute force, but it is not in Web Crypto, so a zero
-  dependency JavaScript version cannot use it.
+- Key derivation: PBKDF2 with SHA-256, 600,000 iterations,
+  fixed for version 1.0, with no override in any encryptor
+  or decryptor. That is the OWASP-recommended work factor
+  for PBKDF2 with SHA-256, and PBKDF2 is the
+  password-oriented choice in the native Web Crypto API,
+  which is why it was chosen, not because it is stronger
+  than Argon2, and not because Web Crypto has no other
+  key derivation options. Web Crypto also supports HKDF,
+  ECDH, and X25519, but those are not password based in
+  the same way. Argon2 is stronger against GPU brute
+  force, but it is not in Web Crypto, so a zero dependency
+  JavaScript version cannot use it.
 - Content encryption: AES-256-GCM. The GCM tag is appended
   to the ciphertext, as in Web Crypto and in Python's
   cryptography library, so the same bytes decrypt in both.
@@ -43,15 +48,20 @@ and ciphertext, with the version 1.0 defaults, because that
 was the layout in the original prompt for this feature.
 Encryptors must always write the full envelope above, so a
 reader can tell what the file is and how it was made.
+A decryptor must reject any present format, cipher, kdf,
+or iterations field that differs from the values above,
+including an explicit null, before any PBKDF2 work.
 
 ## What it is, and what it is not
 
-Encryption here is confidentiality only. It hides titles,
-folders, and links from anyone without the password. It
-does not prove who made the pack. Anyone with the password
-can encrypt a different pack that decrypts just as well.
-If you need to prove authorship, that needs a signature,
-which is a separate feature, not defined here.
+Encryption here is confidentiality, and tamper evidence
+under the password, because AES-GCM authentication fails
+if the ciphertext is changed. It does not prove who made
+the pack. Anyone with the password can encrypt a different
+pack that decrypts just as well, and tamper evidence under
+a shared password is not proof of authorship. If you need
+to prove authorship, that needs a signature, which is a
+separate feature, not defined here.
 
 A lost password means a lost pack, by design. There is no
 recovery, no back door, and no password reset. A weak
@@ -63,7 +73,8 @@ A remote update check cannot work on an encrypted pack
 without decrypting it first. Version, updated date, and
 diff are inside the encrypted part, on purpose, so they do
 not leak. Update checking for encrypted packs is therefore
-manual: decrypt, compare, and replace, in that order.
+manual: decrypt, compare, then replace only after the
+user confirms, as required in SPEC.md Section 12.
 
 ## Where each language runs
 
@@ -76,6 +87,14 @@ Functions are async, because Web Crypto is async:
 import { encryptPack, decryptPack } from "open-bookmarks/encrypt";
 const encrypted = await encryptPack(pack, password);
 const decrypted = await decryptPack(encrypted, password);
+```
+
+That import works only after publication, because the
+`open-bookmarks` package is not yet published. Until then,
+use the repo-relative file instead:
+
+```js
+import { encryptPack, decryptPack } from "./lib/js/encrypt.mjs";
 ```
 
 A wrong password, or a corrupted payload, throws:
@@ -91,7 +110,7 @@ write AES in pure Python to fake one. The Python tool
 therefore needs the cryptography package:
 
 ```sh
-pip install cryptography
+python3 -m pip install cryptography
 python3 tools/encrypt.py encrypt --input pack.json --output encrypted.json
 python3 tools/encrypt.py decrypt --input encrypted.json --output pack.json
 ```

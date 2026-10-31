@@ -132,8 +132,13 @@ export async function decryptPack(encryptedPackage: EncryptedPack, password: str
   if (encryptedPackage.kdf !== undefined && encryptedPackage.kdf !== ENCRYPTION_KDF) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");
   }
+  // Version 1.0 fixes iterations at exactly 600,000. A payload
+  // with no iterations field is the legacy flat layout, and
+  // gets that value. Any other value is rejected before any
+  // PBKDF2 work, so an untrusted payload cannot weaken the
+  // format or force unbounded work.
   const iterations = encryptedPackage.iterations === undefined ? ENCRYPTION_ITERATIONS : encryptedPackage.iterations;
-  if (!Number.isInteger(iterations) || iterations < 1) {
+  if (iterations !== ENCRYPTION_ITERATIONS) {
     throw new Error("Decryption failed. Invalid password or corrupted payload");
   }
   try {
@@ -142,7 +147,10 @@ export async function decryptPack(encryptedPackage: EncryptedPack, password: str
     const ciphertext = hexDecode(encryptedPackage.ciphertext, "ciphertext");
     const key = await deriveKey(password, salt, iterations);
     const plaintext = (await subtle().decrypt({ name: "AES-GCM", iv }, key, ciphertext)) as ArrayBuffer;
-    return JSON.parse(new TextDecoder().decode(plaintext)) as Pack;
+    // Fatal decoding, so malformed UTF-8 fails with the
+    // uniform decryption error instead of silently replacing
+    // bytes and parsing as a different pack.
+    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(plaintext)) as Pack;
   } catch (error) {
     if (error instanceof Error && error.message === "Decryption failed. Invalid password or corrupted payload") {
       throw error;
@@ -152,7 +160,20 @@ export async function decryptPack(encryptedPackage: EncryptedPack, password: str
 }
 
 export function isEncryptedPack(value: unknown): boolean {
-  return Boolean(
-    value && typeof value === "object" && !Array.isArray(value) && typeof (value as EncryptedPack).ciphertext === "string",
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const candidate = value as EncryptedPack;
+  if (candidate.format === ENCRYPTED_FORMAT) {
+    return true;
+  }
+  // Legacy flat layout only: salt, iv, and ciphertext, with
+  // no format field. A plain pack with an unknown ciphertext
+  // field, but no salt or iv, is not encrypted.
+  return (
+    candidate.format === undefined &&
+    typeof candidate.salt === "string" &&
+    typeof candidate.iv === "string" &&
+    typeof candidate.ciphertext === "string"
   );
 }

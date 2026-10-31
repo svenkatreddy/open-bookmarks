@@ -165,7 +165,11 @@ Do not write that format value in a plain pack, and do not try
 to validate an encrypted pack with the plain pack validator.
 Decrypt it first, with the password, then validate the plain
 pack inside, with the normal rules in this document. The browser
-tool in [ENCRYPT-TOOL.md](ENCRYPT-TOOL.md) does both steps.
+tool in [ENCRYPT-TOOL.md](ENCRYPT-TOOL.md) now validates the
+decrypted pack with those rules before showing it, and shows
+the validation errors instead of the pack if it fails. If you
+decrypt outside that tool, run the validator separately on
+the decrypted output before trusting it.
 
 ### title
 
