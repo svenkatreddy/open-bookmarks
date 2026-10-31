@@ -223,9 +223,16 @@ def decrypt_pack(payload, password):
     except InvalidTag:
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
+    # Strict JSON only: Python's json.loads accepts NaN,
+    # Infinity, and -Infinity by default, while JavaScript
+    # JSON.parse rejects them, so a pack that decrypts here
+    # would fail there. Reject those constants, matching JS.
+    def _reject_constant(name):
+        raise ValueError(f"invalid JSON constant: {name}")
+
     try:
-        return json.loads(plaintext.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+        return json.loads(plaintext.decode("utf-8"), parse_constant=_reject_constant)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
         print("error: Decryption failed. Invalid password or corrupted payload", file=sys.stderr)
         raise SystemExit(1)
 

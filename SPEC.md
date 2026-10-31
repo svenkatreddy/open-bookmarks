@@ -210,7 +210,9 @@ normalization applied, the plaintext MUST be UTF-8 JSON
 text, and AES-GCM MUST be used with no additional
 authenticated data. A decryptor MUST decode the plaintext
 as UTF-8 with fatal errors, so malformed UTF-8 fails
-rather than parsing as a different pack.
+rather than parsing as a different pack, and MUST reject
+the non-standard JSON constants NaN, Infinity, and
+-Infinity in the plaintext, as JavaScript JSON.parse does.
 Unknown fields in an encrypted envelope MUST be ignored,
 as in a plain pack. This encrypted format version is
 separate from the plain pack format version, and adding

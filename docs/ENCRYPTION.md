@@ -59,6 +59,10 @@ including an explicit null, before any PBKDF2 work.
 For interoperability, the password is UTF-8 with no
 normalization, the plaintext is UTF-8 JSON text, and
 AES-GCM is used with no additional authenticated data.
+Decryptors must reject the non-standard JSON constants
+NaN, Infinity, and -Infinity in the plaintext, as
+JavaScript JSON.parse does, so a pack that decrypts in
+Python does not fail in JavaScript.
 
 ## What it is, and what it is not
 
