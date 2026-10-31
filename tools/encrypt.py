@@ -94,9 +94,12 @@ def get_password(args):
         return args.password
     try:
         password = getpass.getpass("Password: ")
-    except (EOFError, KeyboardInterrupt):
+    except EOFError:
         print("error: password must not be empty", file=sys.stderr)
         raise SystemExit(2)
+    # KeyboardInterrupt is deliberately not caught here, so
+    # Ctrl-C keeps its standard interrupt behavior instead
+    # of being turned into an empty password error.
     if not password:
         print("error: password must not be empty", file=sys.stderr)
         raise SystemExit(2)

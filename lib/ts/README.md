@@ -192,7 +192,7 @@ in `encrypt-example.ts`, run as `node lib/ts/encrypt-example.ts`.
 - `formatVersion(pack)`: the `format` string, for example
   `open-bookmarks/1.0`, or null if missing.
 - `packAuthor(pack)`: the person or group that made this pack, or null if missing. Pack level only, not the author of a linked page.
-- `encryptPack(pack, password)` and `decryptPack(encrypted, password)`: password based encryption, in `encrypt.ts`, using only Web Crypto, PBKDF2 at 600,000 iterations and AES-256-GCM. See [docs/ENCRYPTION.md](../../docs/ENCRYPTION.md). Or use the browser tool, [docs/ENCRYPT-TOOL.md](../../docs/ENCRYPT-TOOL.md), with no code. A runnable example is in `encrypt-example.ts`.
+- `encryptPack(pack, password)` and `decryptPack(encrypted, password)`: password based encryption, in `encrypt.ts`, using only Web Crypto, PBKDF2 at 600,000 iterations and AES-256-GCM. See [docs/ENCRYPTION.md](https://github.com/svenkatreddy/open-bookmarks/blob/main/docs/ENCRYPTION.md). Or use the browser tool, [docs/ENCRYPT-TOOL.md](https://github.com/svenkatreddy/open-bookmarks/blob/main/docs/ENCRYPT-TOOL.md), with no code. A runnable example is in `encrypt-example.ts`.
 - `packVersion(pack)`: the author `version` of this pack, for
   example `1.2.0`, or null if missing. Not the format version.
 - `formatWarnings(pack)`: list of version warnings, empty for
