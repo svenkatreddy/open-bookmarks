@@ -171,6 +171,13 @@ Unknown fields at any level MUST be ignored. That rule is how the
 format can grow later without breaking old readers. Readers MUST NOT
 rely on unknown fields.
 
+Encrypted packs are a separate file format, not a plain pack
+with an extra field. A whole plain pack is encrypted with a
+password, as defined in docs/ENCRYPTION.md, with format
+"open-bookmarks/encrypted/1.0". A plain pack reader MUST NOT
+try to read an encrypted pack as a pack. Decrypt it first,
+then validate the plain pack inside, with the normal rules.
+
 Note, informative: the schema and the validator both reject a
 title that is only spaces, the schema by a pattern requiring a
 non-space character and the validator by trimming. The prose rule

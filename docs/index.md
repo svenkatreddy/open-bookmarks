@@ -12,7 +12,8 @@ Start with the [spec](../SPEC.md). It is short and it is the source
 of truth for the format. The [README](../README.md) shows a small
 example pack and how to run the converters. For a field by field
 syntax guide, see [SYNTAX.md](SYNTAX.md). For every example pack,
-see [EXAMPLES.md](EXAMPLES.md). For how this repo holds several
+see [EXAMPLES.md](EXAMPLES.md). For password encrypted packs,
+see [ENCRYPTION.md](ENCRYPTION.md). For how this repo holds several
 libraries side by side, see [MONOREPO.md](MONOREPO.md).
 
 In short:

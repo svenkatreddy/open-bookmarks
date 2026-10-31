@@ -68,6 +68,23 @@ Added:
   carry no pack author to map from, and export to Netscape
   drops it, because Netscape HTML has no place for it. The
   format version is unchanged.
+- Encrypted packs, added to the 1.0 draft: a separate file
+  format, `open-bookmarks/encrypted/1.0`, for a whole pack
+  encrypted with a password. PBKDF2 with SHA-256 at 600,000
+  iterations, AES-256-GCM, hex encoded salt (16 bytes), IV
+  (12 bytes), and ciphertext (including the GCM tag).
+  JavaScript and TypeScript use only the native Web Crypto
+  API, with no npm dependencies, and export async
+  encryptPack and decryptPack. Python has a new CLI tool,
+  tools/encrypt.py, which needs the cryptography package,
+  because Python's standard library has no AES-GCM, and
+  there is no pure Python AES fallback. Decrypt accepts a
+  flat salt, iv, and ciphertext payload with the version
+  1.0 defaults, for compatibility with the original flat
+  layout. A wrong password throws a single clear error.
+  This is password only, not public key, and it is
+  confidentiality only, not proof of authorship. The
+  format version for plain packs is unchanged.
 - Standard `icon` field, added to the 1.0 draft after the first
   push, not yet pushed again: an optional object on the pack, on
   folders, and on url nodes, with a required src that must be an
