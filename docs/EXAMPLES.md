@@ -1,13 +1,13 @@
 # Example packs
 
-All packs below are in [../packs/examples/](../packs/examples/).
+All packs below are in [packs/examples/](https://github.com/svenkatreddy/open-bookmarks/tree/main/packs/examples).
 Every one passes `python3 tools/validate.py <file>`. Each snippet
 below is a short excerpt, not the whole file. Open the linked file
 for the full pack.
 
 ## News
 
-File: [../packs/examples/news.json](../packs/examples/news.json)
+File: [packs/examples/news.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/news.json)
 
 What it shows: a normal pack with an inline folder and a remote
 folder. World news is inline. Tech News points at a second pack
@@ -43,7 +43,7 @@ Snippet:
 
 ## Movies
 
-File: [../packs/examples/movies.json](../packs/examples/movies.json)
+File: [packs/examples/movies.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/movies.json)
 
 What it shows: two folders, Reviews and Listings, and a bookmark
 with custom-properties for an icon, an accent, and a client version
@@ -67,7 +67,7 @@ Snippet:
 
 ## Tech
 
-File: [../packs/examples/tech.json](../packs/examples/tech.json)
+File: [packs/examples/tech.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/tech.json)
 
 What it shows: the remote half of the News pack. It is a plain pack
 with two links and no folders. A reader fetches it only when someone
@@ -88,7 +88,7 @@ Snippet:
 
 ## Simple
 
-File: [../packs/examples/simple.json](../packs/examples/simple.json)
+File: [packs/examples/simple.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/simple.json)
 
 What it shows: the smallest useful pack. One folder, two links,
 and pack version "1.0.0". Copy this file when you write your
@@ -117,7 +117,7 @@ Snippet:
 
 ## Nested
 
-File: [../packs/examples/nested.json](../packs/examples/nested.json)
+File: [packs/examples/nested.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/nested.json)
 
 What it shows: folders nested four levels deep. Collections holds
 Topics, which holds Technology, which holds Programming, which holds
@@ -159,7 +159,7 @@ The depth limit is 4 levels, so four levels is valid. See
 
 ## Depth
 
-Valid at exactly 4 levels: [../packs/examples/nested.json](../packs/examples/nested.json).
+Valid at exactly 4 levels: [packs/examples/nested.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/nested.json).
 Collections is level 1, Topics is level 2, Technology is level 3,
 and Programming is level 4. The Python link sits inside the level
 4 folder, and that is allowed, because a link is not a folder level.
@@ -187,7 +187,7 @@ folder at level 5 is invalid even if it contains no links.
 
 ## Remote
 
-File: [../packs/examples/remote.json](../packs/examples/remote.json)
+File: [packs/examples/remote.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/remote.json)
 
 What it shows: a pack that uses a remote folder on purpose, with
 both a local folder and a remote folder side by side. The remote
@@ -211,7 +211,7 @@ itself is shared.
 
 ## Custom properties
 
-File: [../packs/examples/custom-properties.json](../packs/examples/custom-properties.json)
+File: [packs/examples/custom-properties.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/custom-properties.json)
 
 What it shows: custom-properties at three levels. The pack itself
 carries a pack icon and a client tag. A folder carries an accent.
@@ -240,7 +240,7 @@ full rules.
 
 ## Icons
 
-File: [../packs/examples/icon.json](../packs/examples/icon.json)
+File: [packs/examples/icon.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/icon.json)
 
 What it shows: the standard icon field at all three levels, all
 optional. The pack itself has an https PNG icon. The News folder
