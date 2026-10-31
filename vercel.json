@@ -1,1 +1,1 @@
-{"$schema":"https://openapi.vercel.sh/vercel.json","buildCommand":null,"cleanUrls":true,"framework":null,"installCommand":null,"outputDirectory":"docs"}
+{"$schema":"https://openapi.vercel.sh/vercel.json","buildCommand":"npm run docs:build","framework":"vitepress","installCommand":"npm ci","outputDirectory":".vitepress/dist"}

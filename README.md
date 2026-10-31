@@ -215,9 +215,11 @@ to add a new library without changing the spec.
 
 ## Docs
 
-The docs are plain Markdown in `docs/`. To publish them, see
-[docs/DEPLOY.md](docs/DEPLOY.md). It is a short GitHub Pages guide
-with no build step.
+The docs are plain Markdown in `docs/`, plus the spec in
+`SPEC.md`, and they are rendered as a website with VitePress,
+a Node documentation package. No Markdown file is moved for
+the site. To run it locally, or to publish it on Vercel, see
+[docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Licence
 
