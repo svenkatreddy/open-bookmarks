@@ -22,12 +22,13 @@ export default defineConfig({
     "lib/ts/README.md": "lib/ts/index.md",
     "lib/python/README.md": "lib/python/index.md",
   },
-  // Two links that are valid on GitHub, but are not markdown
-  // pages VitePress can build: LICENSE is a plain text file,
-  // and packs/examples/ is a directory of JSON packs. Keep
-  // them as they are in the source, and do not fail the build
-  // for them.
-  ignoreDeadLinks: [/LICENSE/, /packs\/examples/, /^https?:\/\/localhost/],
+  // One link that is valid for local use, but is not a site
+  // page: the local dev URL in DEPLOY.md. LICENSE and
+  // packs/examples/ links are now hosted GitHub URLs, not
+  // relative links, so they are not checked as dead links,
+  // and they work on the built site, where VitePress does
+  // not copy non-Markdown files into the output.
+  ignoreDeadLinks: [/^https?:\/\/localhost/],
   themeConfig: {
     nav: [
       { text: "Home", link: "/" },
@@ -50,7 +51,6 @@ export default defineConfig({
           { text: "Docs home", link: "/docs/" },
           { text: "Syntax", link: "/docs/SYNTAX" },
           { text: "Examples", link: "/docs/EXAMPLES" },
-          { text: "Encrypted packs", link: "/docs/ENCRYPTION" },
           { text: "Monorepo", link: "/docs/MONOREPO" },
           { text: "Deploy", link: "/docs/DEPLOY" },
           { text: "Versions", link: "/docs/versions" },

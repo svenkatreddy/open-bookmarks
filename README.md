@@ -196,14 +196,14 @@ for the manual publish steps that are still needed.
 See [docs/EXAMPLES.md](docs/EXAMPLES.md) for every example pack,
 what it shows, and a short snippet of each. The packs include:
 
-- [packs/examples/news.json](packs/examples/news.json)
-- [packs/examples/movies.json](packs/examples/movies.json)
-- [packs/examples/simple.json](packs/examples/simple.json)
-- [packs/examples/nested.json](packs/examples/nested.json)
-- [packs/examples/remote.json](packs/examples/remote.json)
-- [packs/examples/custom-properties.json](packs/examples/custom-properties.json)
-- [packs/examples/icon.json](packs/examples/icon.json)
-- [packs/examples/tech.json](packs/examples/tech.json)
+- [packs/examples/news.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/news.json)
+- [packs/examples/movies.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/movies.json)
+- [packs/examples/simple.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/simple.json)
+- [packs/examples/nested.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/nested.json)
+- [packs/examples/remote.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/remote.json)
+- [packs/examples/custom-properties.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/custom-properties.json)
+- [packs/examples/icon.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/icon.json)
+- [packs/examples/tech.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/tech.json)
 
 ## Monorepo
 
@@ -223,4 +223,4 @@ the site. To run it locally, or to publish it on Vercel, see
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/svenkatreddy/open-bookmarks/blob/main/LICENSE).
