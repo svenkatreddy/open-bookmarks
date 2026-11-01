@@ -15,8 +15,28 @@ package.json.
 
 From `lib/js`, the files listed in package.json: the library
 `open-bookmarks.mjs`, its type declarations
-`open-bookmarks.d.ts`, this README, the example, and this file.
+`open-bookmarks.d.ts`, this README, the example, and this file,
+plus the encryption entry point `./encrypt`, with
+`encrypt.mjs`, `encrypt.d.ts`, and `encrypt-example.mjs`.
 No other files from the repo are included in the npm package.
+
+Install, after publication, from a project that uses the
+package:
+
+```sh
+npm install open-bookmarks
+```
+
+Then, in code, the main entry point is `open-bookmarks`,
+and the encryption entry point is `open-bookmarks/encrypt`:
+
+```js
+import { loadPack } from "open-bookmarks";
+import { encryptPack, decryptPack } from "open-bookmarks/encrypt";
+```
+
+The second import works only after publication. Until then,
+use the repo-relative file `lib/js/encrypt.mjs` directly.
 
 ## Recommended route: OIDC trusted publishing
 

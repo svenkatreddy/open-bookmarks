@@ -1,1 +1,47 @@
-{"author":"svenkatreddy","bugs":{"url":"https://github.com/svenkatreddy/open-bookmarks/issues"},"description":"A small, dependency free library for open-bookmarks packs: load, validate, flatten, and expand remote folders.","exports":{".":{"import":"./open-bookmarks.mjs","types":"./open-bookmarks.d.ts"},"./package.json":"./package.json"},"files":["open-bookmarks.mjs","open-bookmarks.d.ts","README.md","example.mjs","PUBLISHING.md"],"homepage":"https://github.com/svenkatreddy/open-bookmarks#readme","keywords":["bookmarks","open-bookmarks","bookmark-packs","folders","links"],"license":"MIT","main":"./open-bookmarks.mjs","name":"open-bookmarks","repository":{"directory":"lib/js","type":"git","url":"https://github.com/svenkatreddy/open-bookmarks.git"},"type":"module","types":"./open-bookmarks.d.ts","version":"0.1.0"}
+{
+  "author": "svenkatreddy",
+  "bugs": {
+    "url": "https://github.com/svenkatreddy/open-bookmarks/issues"
+  },
+  "description": "A small, dependency free library for open-bookmarks packs: load, validate, flatten, and expand remote folders.",
+  "exports": {
+    ".": {
+      "types": "./open-bookmarks.d.ts",
+      "import": "./open-bookmarks.mjs"
+    },
+    "./encrypt": {
+      "types": "./encrypt.d.ts",
+      "import": "./encrypt.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "open-bookmarks.mjs",
+    "open-bookmarks.d.ts",
+    "README.md",
+    "example.mjs",
+    "PUBLISHING.md",
+    "encrypt.mjs",
+    "encrypt.d.ts",
+    "encrypt-example.mjs"
+  ],
+  "homepage": "https://github.com/svenkatreddy/open-bookmarks#readme",
+  "keywords": [
+    "bookmarks",
+    "open-bookmarks",
+    "bookmark-packs",
+    "folders",
+    "links"
+  ],
+  "license": "MIT",
+  "main": "./open-bookmarks.mjs",
+  "name": "open-bookmarks",
+  "repository": {
+    "directory": "lib/js",
+    "type": "git",
+    "url": "https://github.com/svenkatreddy/open-bookmarks.git"
+  },
+  "type": "module",
+  "types": "./open-bookmarks.d.ts",
+  "version": "0.1.0"
+}

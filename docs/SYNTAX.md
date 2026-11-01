@@ -20,7 +20,7 @@ labelled as non-normative, do not create rules. If an example and a
 normative rule disagree, the normative rule governs.
 
 The normative machine-readable definition is the JSON Schema in
-[../schema/open-bookmarks.schema.json](../schema/open-bookmarks.schema.json),
+[open-bookmarks.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks.schema.json),
 using JSON Schema draft 2020-12. The prose in [../SPEC.md](../SPEC.md)
 is the normative human-readable definition. The two are intended to
 agree. One known difference in strength is stated where it
@@ -155,6 +155,21 @@ the pack, on a different major version, naming the version found.
 The schema for 1.0 states format as a constant, so a 1.1 pack fails
 the schema alone but passes the validator with a warning. That
 difference is intentional and is documented in the specification.
+
+Encrypted packs are not plain packs, and their format is not a
+valid value here. A file with format
+"open-bookmarks/encrypted/1.0" is a separate file format, defined
+in [ENCRYPTION.md](ENCRYPTION.md), with its own schema in
+[open-bookmarks-encrypted.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks-encrypted.schema.json).
+Do not write that format value in a plain pack, and do not try
+to validate an encrypted pack with the plain pack validator.
+Decrypt it first, with the password, then validate the plain
+pack inside, with the normal rules in this document. The browser
+tool in [ENCRYPT-TOOL.md](ENCRYPT-TOOL.md) now validates the
+decrypted pack with those rules before showing it, and shows
+the validation errors instead of the pack if it fails. If you
+decrypt outside that tool, run the validator separately on
+the decrypted output before trusting it.
 
 ### title
 
@@ -920,6 +935,10 @@ field section above states the rule.
 
 - Missing format, or format written as "1.0" instead of
   "open-bookmarks/1.0".
+- Trying to validate an encrypted pack as a plain pack, or
+  writing "open-bookmarks/encrypted/1.0" as the format of a
+  plain pack. Encrypted packs are a separate format, decrypt
+  first, as explained in the format section above.
 - nodes written as a single object instead of a list.
 - A node type written as "link", "bookmark", or "remote" instead
   of "folder" or "url".
@@ -944,8 +963,13 @@ field section above states the rule.
 
 - [../SPEC.md](../SPEC.md): the full specification, and the source
   of truth if this document and the specification disagree.
-- [../schema/open-bookmarks.schema.json](../schema/open-bookmarks.schema.json):
+- [open-bookmarks.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks.schema.json):
   the machine-readable definition, JSON Schema draft 2020-12.
+- [ENCRYPTION.md](ENCRYPTION.md): the separate encrypted pack
+  format, and its own schema in
+  [open-bookmarks-encrypted.schema.json](https://github.com/svenkatreddy/open-bookmarks/blob/main/schema/open-bookmarks-encrypted.schema.json).
+- [ENCRYPT-TOOL.md](ENCRYPT-TOOL.md): encrypt a plain pack and
+  decrypt an encrypted pack in your browser.
 - [EXAMPLES.md](EXAMPLES.md): every example pack, what it shows,
   and a short snippet of each.
 - [versions.md](versions.md): the version history.

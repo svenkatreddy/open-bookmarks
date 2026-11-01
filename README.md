@@ -135,6 +135,18 @@ refresh, a reader compares version, updated date, and a content diff
 by URL, as described in SPEC.md Section 12, and shows an update
 option if anything changed.
 
+## Encrypted packs
+
+A whole pack can be encrypted with a password, as a separate
+file format, `open-bookmarks/encrypted/1.0`, using PBKDF2 with
+SHA-256 at 600,000 iterations and AES-256-GCM, with hex encoded
+salt, IV, and ciphertext. See [docs/ENCRYPTION.md](docs/ENCRYPTION.md).
+JavaScript and TypeScript use only the native Web Crypto API,
+with no npm dependencies. Python needs the `cryptography`
+package, because Python's standard library has no AES-GCM.
+React Native does not have Web Crypto out of the box, so it
+needs a different engine behind the same payload format.
+
 ## Convert your old bookmarks
 
 The converters live in `tools/` and need only Python 3, nothing else
@@ -204,6 +216,7 @@ what it shows, and a short snippet of each. The packs include:
 - [packs/examples/custom-properties.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/custom-properties.json)
 - [packs/examples/icon.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/icon.json)
 - [packs/examples/tech.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/tech.json)
+- [packs/examples/encrypted-template.json](https://raw.githubusercontent.com/svenkatreddy/open-bookmarks/main/packs/examples/encrypted-template.json), structural only, not a plain pack, see [docs/ENCRYPTION.md](docs/ENCRYPTION.md)
 
 ## Monorepo
 

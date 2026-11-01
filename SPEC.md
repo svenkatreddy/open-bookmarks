@@ -171,6 +171,54 @@ Unknown fields at any level MUST be ignored. That rule is how the
 format can grow later without breaking old readers. Readers MUST NOT
 rely on unknown fields.
 
+Encrypted packs are a separate file format, not a plain pack
+with an extra field. A whole plain pack is encrypted with a
+password, as defined in docs/ENCRYPTION.md, with format
+"open-bookmarks/encrypted/1.0". The machine-readable
+definition of that envelope is
+schema/open-bookmarks-encrypted.schema.json, which checks
+the envelope structure only, not that it decrypts. A plain
+pack reader MUST NOT try to read an encrypted pack as a
+pack. Decrypt it first, then validate the plain pack
+inside, with the normal rules.
+
+Normative, encrypted envelope: docs/ENCRYPTION.md is
+normative for this format, in addition to this section.
+An encrypted pack MUST be a JSON object with these fields:
+format MUST be exactly "open-bookmarks/encrypted/1.0",
+cipher MUST be exactly "AES-256-GCM", kdf MUST be exactly
+"PBKDF2-HMAC-SHA-256", iterations MUST be exactly 600000,
+salt MUST be hex for exactly 16 bytes, iv MUST be hex for
+exactly 12 bytes, and ciphertext MUST be hex for at least
+16 bytes, the GCM tag, plus the encrypted plain pack bytes.
+An encryptor MUST always write the full envelope above.
+A decryptor MUST apply an all-or-none rule to the four
+metadata fields, before any PBKDF2 work: either none of
+format, cipher, kdf, or iterations is present, which is
+the legacy flat layout, or all four are present with the
+exact values above. A payload with some, but not all, of
+those four fields is neither form, and MUST be rejected,
+as MUST an envelope where a present field differs from
+the values above, or an explicit null for any of those
+fields. The legacy flat layout, a payload with only salt,
+iv, and ciphertext, and no format, cipher, kdf, or
+iterations field, MUST be accepted with the version 1.0
+values above.
+Byte level, for interoperability across implementations:
+the password MUST be encoded as UTF-8 with no
+normalization applied, the plaintext MUST be UTF-8 JSON
+text, and AES-GCM MUST be used with no additional
+authenticated data. A decryptor MUST decode the plaintext
+as UTF-8 with fatal errors, so malformed UTF-8 fails
+rather than parsing as a different pack, and MUST reject
+the non-standard JSON constants NaN, Infinity, and
+-Infinity in the plaintext, as JavaScript JSON.parse does.
+Unknown fields in an encrypted envelope MUST be ignored,
+as in a plain pack. This encrypted format version is
+separate from the plain pack format version, and adding
+encrypted packs does not change the plain pack format
+version, which stays "open-bookmarks/1.0".
+
 Note, informative: the schema and the validator both reject a
 title that is only spaces, the schema by a pattern requiring a
 non-space character and the validator by trimming. The prose rule

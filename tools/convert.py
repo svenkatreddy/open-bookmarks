@@ -639,6 +639,21 @@ def main(argv=None):
         except json.JSONDecodeError as exc:
             print("error: input is not valid JSON: %s" % exc, file=sys.stderr)
             return 1
+        if isinstance(data, dict) and (
+            data.get("format") == "open-bookmarks/encrypted/1.0"
+            or (
+                "salt" in data
+                and "iv" in data
+                and "ciphertext" in data
+                and "format" not in data
+            )
+        ):
+            print(
+                "error: input is an encrypted pack, not a plain pack: "
+                "decrypt it first, then convert the plain pack inside",
+                file=sys.stderr,
+            )
+            return 1
         if from_format == "chrome":
             title, nodes = parse_chrome(data)
         elif from_format == "firefox":
